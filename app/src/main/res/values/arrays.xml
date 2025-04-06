@@ -1,0 +1,43 @@
+<resources>
+    <string-array name="character_classes">
+        <item>Barbarian</item>
+        <item>Bard</item>
+        <item>Cleric</item>
+        <item>Druid</item>
+        <item>Fighter</item>
+        <item>Monk</item>
+        <item>Paladin</item>
+        <item>Ranger</item>
+        <item>Rogue</item>
+        <item>Sorcerer</item>
+        <item>Warlock</item>
+        <item>Wizard</item>
+    </string-array>
+
+    <string-array name="character_races">
+        <item>Human</item>
+        <item>Dwarf</item>
+        <item>Elf</item>
+        <item>Halfling</item>
+        <item>Gnome</item>
+        <item>Half-Orc</item>
+        <item>Dragonborn</item>
+        <item>Tiefling</item>
+    </string-array>
+
+    <string-array name="armor_types">
+        <item>No armor</item>
+        <item>Padded</item>
+        <item>Leather</item>
+        <item>Studded leather</item>
+        <item>Hide</item>
+        <item>Chain shirt</item>
+        <item>Scale mail</item>
+        <item>Breastplate</item>
+        <item>Half plate</item>
+        <item>Ring mail</item>
+        <item>Chain mail</item>
+        <item>Splint</item>
+        <item>Plate</item>
+    </string-array>
+</resources>

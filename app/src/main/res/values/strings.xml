@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">RPG_Character_Sheet</string>
+    <string name="save_button_text">Save</string>
+    <string name="constitution_hint">Constitution</string>
+    <string name="description_hint">Description</string>
+    <string name="add">Add</string>
+    <string name="character_class">Character Class</string>
+    <string name="character_name">Character Name</string>
+    <string name="health_points">Health points:</string>
+    <string name="walking_speed">Walking speed:</string>
+    <string name="armor_class">Armor class:</string>
+    <string name="str">Str</string>
+    <string name="dex">Dex</string>
+    <string name="con">Con</string>
+    <string name="inl">Int</string>
+    <string name="wis">Wis</string>
+    <string name="cha">Cha</string>
+</resources>

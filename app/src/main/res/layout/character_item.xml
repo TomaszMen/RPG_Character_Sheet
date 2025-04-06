@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="400dp"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="4dp"
+    android:layout_margin="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/character_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/character_name"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:gravity="center"/>
+
+        <TextView
+            android:id="@+id/character_class"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/character_class"
+            android:textSize="28sp"
+            android:gravity="center"/>
+
+        <TextView
+            android:id="@+id/health_points"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/health_points"
+            android:textSize="20sp"
+            android:gravity="center"/>
+
+        <TextView
+            android:id="@+id/walking_speed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/walking_speed"
+            android:textSize="20sp"
+            android:gravity="center"/>
+
+        <TextView
+            android:id="@+id/a_c"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/armor_class"
+            android:textSize="20sp"
+            android:gravity="center"/>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/character_stats"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:id="@+id/str_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/str"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/dex_label"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <TextView
+                android:id="@+id/dex_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/dex"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toEndOf="@id/str_label"
+                app:layout_constraintEnd_toStartOf="@id/con_label"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <TextView
+                android:id="@+id/con_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/con"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toEndOf="@id/dex_label"
+                app:layout_constraintEnd_toStartOf="@id/int_label"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <TextView
+                android:id="@+id/int_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/inl"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toEndOf="@id/con_label"
+                app:layout_constraintEnd_toStartOf="@id/wisd_label"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <TextView
+                android:id="@+id/wisd_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/wis"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toEndOf="@id/int_label"
+                app:layout_constraintEnd_toStartOf="@id/cha_label"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <TextView
+                android:id="@+id/cha_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/cha"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toEndOf="@id/wisd_label"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <TextView
+                android:id="@+id/character_strength"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:textSize="20sp"
+                android:gravity="center"
+                app:layout_constraintStart_toStartOf="@id/str_label"
+                app:layout_constraintEnd_toEndOf="@id/str_label"
+                app:layout_constraintTop_toBottomOf="@id/str_label"
+                android:layout_marginTop="2dp"/>
+
+            <TextView
+                android:id="@+id/character_dexterity"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:textSize="20sp"
+                android:gravity="center"
+                app:layout_constraintStart_toStartOf="@id/dex_label"
+                app:layout_constraintEnd_toEndOf="@id/dex_label"
+                app:layout_constraintTop_toBottomOf="@id/dex_label"
+                android:layout_marginTop="2dp"/>
+
+            <TextView
+                android:id="@+id/character_constitution"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:textSize="20sp"
+                android:gravity="center"
+                app:layout_constraintStart_toStartOf="@id/con_label"
+                app:layout_constraintEnd_toEndOf="@id/con_label"
+                app:layout_constraintTop_toBottomOf="@id/con_label"
+                android:layout_marginTop="2dp"/>
+
+            <TextView
+                android:id="@+id/character_intelligence"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:textSize="20sp"
+                android:gravity="center"
+                app:layout_constraintStart_toStartOf="@id/int_label"
+                app:layout_constraintEnd_toEndOf="@id/int_label"
+                app:layout_constraintTop_toBottomOf="@id/int_label"
+                android:layout_marginTop="2dp"/>
+
+            <TextView
+                android:id="@+id/character_wisdom"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:textSize="20sp"
+                android:gravity="center"
+                app:layout_constraintStart_toStartOf="@id/wisd_label"
+                app:layout_constraintEnd_toEndOf="@id/wisd_label"
+                app:layout_constraintTop_toBottomOf="@id/wisd_label"
+                android:layout_marginTop="2dp"/>
+
+            <TextView
+                android:id="@+id/character_charisma"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:textSize="20sp"
+                android:gravity="center"
+                app:layout_constraintStart_toStartOf="@id/cha_label"
+                app:layout_constraintEnd_toEndOf="@id/cha_label"
+                app:layout_constraintTop_toBottomOf="@id/cha_label"
+                android:layout_marginTop="2dp"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>
