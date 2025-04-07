@@ -3,6 +3,8 @@ package com.example.rpg_character_sheet
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -38,7 +40,17 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<FloatingActionButton>(R.id.add_button).setOnClickListener {
-            startActivity(Intent(this, AddEditCharacterActivity::class.java))
+            try {
+                val intent = Intent(this@MainActivity, AddEditCharacterActivity::class.java)
+                startActivity(intent)
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Add button crash: ${e.stackTraceToString()}")
+                Toast.makeText(
+                    this@MainActivity,
+                    "Could not open editor: ${e.localizedMessage}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
     }
 }
