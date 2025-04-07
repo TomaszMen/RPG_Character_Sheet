@@ -4,40 +4,28 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "characters")
-class Character {
-    @PrimaryKey(autoGenerate = true)
-    var id: Int = 0
-
-    var name: String? = null
-    var description: String? = null
-    var characterClass: String? = null
-    var race: String? = null
-    var armorType: String? = null
-    var level: Int = 1
-    var maxHp: Int = 0
-    var armorClass: Int = 0
-    var walkingSpeed: Int = 0
-
-    var stats: IntArray = IntArray(7)
-    var modifiers: IntArray = IntArray(7)
-
-    val globalStrId = 0
-    val globalDexId = 1
-    val globalConId = 2
-    val globalIntId = 3
-    val globalWisId = 4
-    val globalChaId = 6
-
-    val str: Int get() = stats[globalStrId]
-    val dex: Int get() = stats[globalDexId]
-    val con: Int get() = stats[globalConId]
-    val int: Int get() = stats[globalIntId]
-    val wis: Int get() = stats[globalWisId]
-    val cha: Int get() = stats[globalChaId]
-
-    val hp: Int get() = maxHp
-    val ac: Int get() = armorClass
-    val ws: Int get() = walkingSpeed
+data class Character(
+    @PrimaryKey(autoGenerate = true) var id: Int = 0,
+    var name: String? = null,
+    var description: String? = null,
+    var characterClass: String? = null,
+    var race: String? = null,
+    var armorType: String? = null,
+    var level: Int = 1,
+    var maxHp: Int = 0,
+    var armorClass: Int = 10,
+    var walkingSpeed: Int = 30,
+    var stats: IntArray = IntArray(6),
+    var modifiers: IntArray = IntArray(6)
+) {
+    companion object {
+        const val globalStrId = 0
+        const val globalDexId = 1
+        const val globalConId = 2
+        const val globalIntId = 3
+        const val globalWisId = 4
+        const val globalChaId = 5
+    }
 
     fun updateModifiers() {
         // Implementation to be added
@@ -63,6 +51,19 @@ class Character {
             }
         }
     }
+
+    fun getDisplayName() = name ?: "N/A"
+    fun getCharacterClassDisplay() = characterClass ?: "N/A"
+    fun getHP() = maxHp
+    fun getAC() = armorClass
+    fun getWS() = walkingSpeed
+
+    fun getStr() = stats[globalStrId]
+    fun getDex() = stats[globalDexId]
+    fun getCon() = stats[globalConId]
+    fun getInt() = stats[globalIntId]
+    fun getWis() = stats[globalWisId]
+    fun getCha() = stats[globalChaId]
 
     fun updateMaxHp() {
         val hpPerLevel = when (characterClass) {
@@ -94,7 +95,8 @@ class Character {
         if (walkingSpeed != other.walkingSpeed) return false
         if (!stats.contentEquals(other.stats)) return false
         if (!modifiers.contentEquals(other.modifiers)) return false
-
+        if (!stats.contentEquals(other.stats)) return false
+        if (!modifiers.contentEquals(other.modifiers)) return false
         return true
     }
 
@@ -109,6 +111,8 @@ class Character {
         result = 31 * result + maxHp
         result = 31 * result + armorClass
         result = 31 * result + walkingSpeed
+        result = 31 * result + stats.contentHashCode()
+        result = 31 * result + modifiers.contentHashCode()
         result = 31 * result + stats.contentHashCode()
         result = 31 * result + modifiers.contentHashCode()
         return result
