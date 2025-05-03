@@ -46,6 +46,7 @@ class CharacterAdapter(
             intl.text = character.getInt().toString()
             wis.text = character.getWis().toString()
             cha.text = character.getCha().toString()
+
         }
     }
 

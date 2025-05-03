@@ -24,7 +24,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun delete(character: Character) {
         scope.launch { characterDao.delete(character) }
-        }
+    }
 
     override fun onCleared() {
         super.onCleared()
