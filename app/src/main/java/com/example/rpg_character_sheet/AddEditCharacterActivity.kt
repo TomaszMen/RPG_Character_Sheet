@@ -96,12 +96,12 @@ class AddEditCharacterActivity : AppCompatActivity() {
                 nameEdit.setText(it.name)
                 descriptionEdit.setText(it.description)
                 levelEdit.setText(it.level.toString())
-                strengthEdit.setText(it.stats[Character.globalStrId].toString())
-                dexterityEdit.setText(it.stats[Character.globalDexId].toString())
-                constitutionEdit.setText(it.stats[Character.globalConId].toString())
-                intelligenceEdit.setText(it.stats[Character.globalIntId].toString())
-                wisdomEdit.setText(it.stats[Character.globalWisId].toString())
-                charismaEdit.setText(it.stats[Character.globalChaId].toString())
+                strengthEdit.setText(it.stats[Character.STR].toString())
+                dexterityEdit.setText(it.stats[Character.DEX].toString())
+                constitutionEdit.setText(it.stats[Character.CON].toString())
+                intelligenceEdit.setText(it.stats[Character.INT].toString())
+                wisdomEdit.setText(it.stats[Character.WIS].toString())
+                charismaEdit.setText(it.stats[Character.CHA].toString())
 
                 characterClass.setSelection(getSpinnerIndex(characterClass, it.characterClass))
                 raceSpinner.setSelection(getSpinnerIndex(raceSpinner, it.race))
@@ -186,12 +186,12 @@ class AddEditCharacterActivity : AppCompatActivity() {
                 this.race = race
                 this.armorType = armorType
                 this.level = level
-                stats[Character.globalStrId] = strength
-                stats[Character.globalDexId] = dexterity
-                stats[Character.globalConId] = constitution
-                stats[Character.globalIntId] = intelligence
-                stats[Character.globalWisId] = wisdom
-                stats[Character.globalChaId] = charisma
+                stats[Character.STR] = strength
+                stats[Character.DEX] = dexterity
+                stats[Character.CON] = constitution
+                stats[Character.INT] = intelligence
+                stats[Character.WIS] = wisdom
+                stats[Character.CHA] = charisma
                 this.alignment = alignment
                 this.background = background
 

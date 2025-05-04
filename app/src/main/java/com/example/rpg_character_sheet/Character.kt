@@ -1,6 +1,7 @@
 package com.example.rpg_character_sheet
 
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import java.util.*
@@ -8,7 +9,8 @@ import java.util.*
 @Entity(tableName = "characters")
 @TypeConverters(Converters::class)
 data class Character(
-    @PrimaryKey(autoGenerate = true) var id: Int = 0,
+    @PrimaryKey(autoGenerate = true)
+    var id: Int = 0,
     var name: String? = null,
     var description: String? = null,
     var characterClass: String? = null,
@@ -24,13 +26,14 @@ data class Character(
     var walkingSpeed: Int = 30,
     var stats: IntArray = IntArray(6),
     var modifiers: IntArray = IntArray(6),
-    var skills: MutableMap<Skill, Boolean> = EnumMap(Skill::class.java),
     var proficiencyBonus: Int = 2,
     var personalityTraits: String? = null,
     var ideals: String? = null,
     var bonds: String? = null,
     var flaws: String? = null,
-    var languages: MutableList<String> = mutableListOf()
+    @Ignore
+    val skills: MutableMap<Skill, Boolean> = mutableMapOf()
+
 ) {
     enum class Skill(val associatedStat: Int) {
         ACROBATICS(1),    // DEX
@@ -53,17 +56,6 @@ data class Character(
         SURVIVAL(4);      // WIS
     }
 
-    enum class CurrencyType {
-        CP, SP, EP, GP, PP
-    }
-
-    data class Attack(
-        val name: String,
-        val attackBonus: Int,
-        val damage: String,
-        val damageType: String
-    )
-
     companion object {
         const val STR = 0
         const val DEX = 1
@@ -83,6 +75,19 @@ data class Character(
     private fun initSkills() {
         Skill.values().forEach { skills[it] = false }
     }
+
+    fun getDisplayName() = name ?: "N/A"
+    fun getCharacterClassDisplay() = characterClass ?: "N/A"
+    fun getHP() = maxHp
+    fun getAC() = armorClass
+    fun getWS() = walkingSpeed
+
+    fun getStr() = stats[STR]
+    fun getDex() = stats[DEX]
+    fun getCon() = stats[CON]
+    fun getInt() = stats[INT]
+    fun getWis() = stats[WIS]
+    fun getCha() = stats[CHA]
 
     fun updateAll() {
         updateModifiers()
@@ -181,8 +186,7 @@ data class Character(
         if (personalityTraits != other.personalityTraits) return false
         if (ideals != other.ideals) return false
         if (bonds != other.bonds) return false
-        if (flaws != other.flaws) return false
-        return languages == other.languages
+        return flaws == other.flaws
     }
 
     override fun hashCode(): Int {
@@ -208,7 +212,6 @@ data class Character(
         result = 31 * result + (ideals?.hashCode() ?: 0)
         result = 31 * result + (bonds?.hashCode() ?: 0)
         result = 31 * result + (flaws?.hashCode() ?: 0)
-        result = 31 * result + languages.hashCode()
         return result
     }
 }
