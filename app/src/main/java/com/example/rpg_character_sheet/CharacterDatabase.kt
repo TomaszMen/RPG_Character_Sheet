@@ -11,6 +11,7 @@ import com.example.rpg_character_sheet.Converters
 @TypeConverters(Converters::class)
 abstract class CharacterDatabase : RoomDatabase() {
     abstract fun characterDao(): CharacterDao
+    abstract fun characterDao2(): CharacterDao2
 
     companion object {
         @Volatile
