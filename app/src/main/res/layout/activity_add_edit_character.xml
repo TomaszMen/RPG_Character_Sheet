@@ -246,7 +246,89 @@
             android:layout_marginTop="8dp"
             tools:ignore="HardcodedText" />
 
+
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- New Section: Character Identity -->
+    <LinearLayout
+        android:id="@+id/identity_section"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/character_stats"
+        android:layout_marginTop="8dp">
+
+        <Spinner
+            android:id="@+id/alignment_spinner"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"/>
+
+        <Spinner
+            android:id="@+id/background_spinner"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/dynamic_stats_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Combat Stats"
+        android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@id/identity_section"
+        android:layout_marginTop="16dp"/>
+
+    <LinearLayout
+        android:id="@+id/dynamic_stats"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/dynamic_stats_label">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="AC: 10"
+            android:id="@+id/ac_value"
+            android:gravity="center"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Speed: 30ft"
+            android:id="@+id/speed_value"
+            android:gravity="center"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Initiative: +0"
+            android:id="@+id/initiative_value"
+            android:gravity="center"/>
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/personality_traits_edit"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:hint="Personality Traits"
+        android:inputType="textMultiLine"
+        app:layout_constraintTop_toBottomOf="@id/dynamic_stats"/>
+
+    <!-- Languages Section -->
+    <MultiAutoCompleteTextView
+        android:id="@+id/languages_edit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Languages (comma separated)"
+        app:layout_constraintTop_toBottomOf="@id/personality_traits_edit"/>
+
 
     <Button
         android:id="@+id/save_button"
@@ -256,7 +338,7 @@
         android:padding="12dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/character_stats"
+        app:layout_constraintTop_toBottomOf="@id/languages_edit"
         android:layout_marginTop="16dp" />
 
     <Button

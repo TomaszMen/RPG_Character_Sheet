@@ -69,4 +69,39 @@
         <item>Splint</item>
         <item>Plate</item>
     </string-array>
+
+    <string-array name="subclasses">
+        <item>None</item>
+        <item>Berserker</item>
+        <item>Lore</item>
+        <item>Life</item>
+        <!-- Add more subclasses -->
+    </string-array>
+
+    <string-array name="subraces">
+        <item>None</item>
+        <item>High Elf</item>
+        <item>Hill Dwarf</item>
+        <!-- Add more subraces -->
+    </string-array>
+
+    <string-array name="backgrounds">
+        <item>Acolyte</item>
+        <item>Folk Hero</item>
+        <item>Sage</item>
+        <item>Rouge</item>
+        <item>Soldier</item>
+    </string-array>
+
+    <string-array name="alignments">
+        <item>Lawful Good</item>
+        <item>Neutral Good</item>
+        <item>Chaotic Good</item>
+        <item>Lawful Neutral</item>
+        <item>Neutral</item>
+        <item>Chaotic Neutral</item>
+        <item>Lawful Evil</item>
+        <item>Neutral Evil</item>
+        <item>Chaotic Evil</item>
+    </string-array>
 </resources>

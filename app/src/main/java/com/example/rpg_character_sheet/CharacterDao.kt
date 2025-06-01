@@ -37,7 +37,7 @@ import kotlinx.coroutines.flow.Flow
 
 
 @Dao
-interface CharacterDao2 {
+interface CharacterDao {
     @Insert
     suspend fun insert(character: Character)
 
@@ -51,5 +51,19 @@ interface CharacterDao2 {
     fun getAllCharacters(): Flow<List<Character>>
 
     @Query("SELECT * FROM characters WHERE characterId = :id")
-    fun getCharacterById(id: Int): Flow<Character?>
+    fun getCharacterById(id: Int): LiveData<Character>
+
+    @Transaction
+    @Query("SELECT * FROM characters WHERE id = :characterId")
+    suspend fun getCharacterWithLanguages(characterId: Int): DatabaseRelations
+
+    @Insert
+    suspend fun insertLanguage(language: LanguageDatabase)
+
+    @Delete
+    suspend fun deleteLanguage(language: LanguageDatabase)
+
+    @Query("DELETE FROM character_languages WHERE characterId = :characterId")
+    suspend fun deleteAllLanguagesForCharacter(characterId: Int)
+
 }
