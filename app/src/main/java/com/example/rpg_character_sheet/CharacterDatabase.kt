@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.example.rpg_character_sheet.Converters
 
-@Database(entities = [Character::class], version = 1, exportSchema = false)
+@Database(entities = [Character::class, Language::class], version = 1)
 @TypeConverters(Converters::class)
 abstract class CharacterDatabase : RoomDatabase() {
     abstract fun characterDao(): CharacterDao

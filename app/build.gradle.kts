@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     //implementation(libs.gson)
 
+    val roomVersion = "2.6.1"
 
     // Only present here
     implementation(libs.androidx.recyclerview)

@@ -29,6 +29,8 @@ class AddEditCharacterActivity : AppCompatActivity() {
     private lateinit var characterClass: Spinner
     private lateinit var raceSpinner: Spinner
     private lateinit var armorSpinner: Spinner
+    private lateinit var alignmentSpinner: Spinner
+    private lateinit var backgroundSpinner: Spinner
 
     private var characterId = 0
 
@@ -66,12 +68,16 @@ class AddEditCharacterActivity : AppCompatActivity() {
         characterClass = findViewById(R.id.character_class)
         raceSpinner = findViewById(R.id.race_spinner)
         armorSpinner = findViewById(R.id.armor_spinner)
+        alignmentSpinner = findViewById(R.id.alignment_spinner)
+        backgroundSpinner = findViewById(R.id.background_spinner)
     }
 
     private fun setupSpinners() {
         characterClass.adapter = createSpinnerAdapter(R.array.character_classes)
         raceSpinner.adapter = createSpinnerAdapter(R.array.character_races)
         armorSpinner.adapter = createSpinnerAdapter(R.array.armor_types)
+        alignmentSpinner.adapter = createSpinnerAdapter(R.array.alignments)
+        backgroundSpinner.adapter = createSpinnerAdapter(R.array.backgrounds)
     }
 
     private fun createSpinnerAdapter(arrayResId: Int): ArrayAdapter<CharSequence> {
@@ -90,16 +96,18 @@ class AddEditCharacterActivity : AppCompatActivity() {
                 nameEdit.setText(it.name)
                 descriptionEdit.setText(it.description)
                 levelEdit.setText(it.level.toString())
-                strengthEdit.setText(it.stats[Character.globalStrId].toString())
-                dexterityEdit.setText(it.stats[Character.globalDexId].toString())
-                constitutionEdit.setText(it.stats[Character.globalConId].toString())
-                intelligenceEdit.setText(it.stats[Character.globalIntId].toString())
-                wisdomEdit.setText(it.stats[Character.globalWisId].toString())
-                charismaEdit.setText(it.stats[Character.globalChaId].toString())
+                strengthEdit.setText(it.stats[Character.STR].toString())
+                dexterityEdit.setText(it.stats[Character.DEX].toString())
+                constitutionEdit.setText(it.stats[Character.CON].toString())
+                intelligenceEdit.setText(it.stats[Character.INT].toString())
+                wisdomEdit.setText(it.stats[Character.WIS].toString())
+                charismaEdit.setText(it.stats[Character.CHA].toString())
 
                 characterClass.setSelection(getSpinnerIndex(characterClass, it.characterClass))
                 raceSpinner.setSelection(getSpinnerIndex(raceSpinner, it.race))
                 armorSpinner.setSelection(getSpinnerIndex(armorSpinner, it.armorType))
+                alignmentSpinner.setSelection(getSpinnerIndex(alignmentSpinner, it.alignment))
+                backgroundSpinner.setSelection(getSpinnerIndex(backgroundSpinner, it.background))
             }
         }
     }
@@ -140,6 +148,8 @@ class AddEditCharacterActivity : AppCompatActivity() {
         val intStr = intelligenceEdit.text.toString()
         val wisStr = wisdomEdit.text.toString()
         val chaStr = charismaEdit.text.toString()
+        val alignment = alignmentSpinner.selectedItem.toString()
+        val background = alignmentSpinner.selectedItem.toString()
 
         if (name.isEmpty() || levelStr.isEmpty() || strStr.isEmpty() || dexStr.isEmpty() ||
             conStr.isEmpty() || intStr.isEmpty() || wisStr.isEmpty() || chaStr.isEmpty()) {
@@ -176,12 +186,14 @@ class AddEditCharacterActivity : AppCompatActivity() {
                 this.race = race
                 this.armorType = armorType
                 this.level = level
-                stats[Character.globalStrId] = strength
-                stats[Character.globalDexId] = dexterity
-                stats[Character.globalConId] = constitution
-                stats[Character.globalIntId] = intelligence
-                stats[Character.globalWisId] = wisdom
-                stats[Character.globalChaId] = charisma
+                stats[Character.STR] = strength
+                stats[Character.DEX] = dexterity
+                stats[Character.CON] = constitution
+                stats[Character.INT] = intelligence
+                stats[Character.WIS] = wisdom
+                stats[Character.CHA] = charisma
+                this.alignment = alignment
+                this.background = background
 
                 updateArmorStats()
                 updateMaxHp()
