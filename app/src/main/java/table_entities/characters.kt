@@ -53,7 +53,6 @@ import androidx.room.PrimaryKey
 data class Character(
     @PrimaryKey(autoGenerate = true)
     val characterId: Int = 0,
-    val playerName: String,
     val characterName: String,
     val raceId: Int,
     val subraceId: Int? = null,
