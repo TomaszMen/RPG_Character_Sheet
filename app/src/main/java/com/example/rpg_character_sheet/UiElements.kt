@@ -36,7 +36,7 @@ import androidx.navigation.NavHostController
 fun CharactersScreen(navController: NavHostController) {
 	val viewModel: CharacterViewModel = viewModel(
 		LocalViewModelStoreOwner.current!!,
-		"CharacterViewModel2",
+		"CharacterViewModel",
 		CharacterViewModelFactory(LocalContext.current.applicationContext as Application)
 	)
 	val characters by viewModel.characters.collectAsStateWithLifecycle()
@@ -89,7 +89,7 @@ fun CharactersScreen(navController: NavHostController) {
 fun CharacterAddScreen(navController: NavHostController) {
 	val viewModel: CharacterViewModel = viewModel(
 		LocalViewModelStoreOwner.current!!,
-		"CharacterViewModel2",
+		"CharacterViewModel",
 		CharacterViewModelFactory(LocalContext.current.applicationContext as Application)
 	)
 
@@ -117,7 +117,7 @@ fun CharacterAddScreen(navController: NavHostController) {
 fun CharacterEditScreen(characterId: Int, navController: NavHostController) {
 	val viewModel: CharacterViewModel = viewModel(
 		LocalViewModelStoreOwner.current!!,
-		"CharacterViewModel2",
+		"CharacterViewModel",
 		CharacterViewModelFactory(LocalContext.current.applicationContext as Application)
 	)
 	val selectedCharacter = viewModel.getCharacterById(characterId).collectAsState(initial = null).value
