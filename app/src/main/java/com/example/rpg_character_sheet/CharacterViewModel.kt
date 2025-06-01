@@ -26,9 +26,11 @@ class CharacterViewModel(application: Application) : ViewModel() {
 
 	// Allows reading and writing data
 	private val _characters = MutableStateFlow<List<Character>>(emptyList())
+	private val _selectedCharacterId = MutableStateFlow(0)
 
 	// Allows only reading the data
 	val characters: StateFlow<List<Character>> get() = _characters
+	//val selectedCharacterId: StateFlow<Int?> get() = _selectedCharacterId
 
 
 	// Called upon creation of each instance
@@ -43,6 +45,14 @@ class CharacterViewModel(application: Application) : ViewModel() {
 				_characters.value = characterList
 			}
 		}
+	}
+
+	fun selectCharacter(id: Int) {
+		_selectedCharacterId.value = id
+	}
+
+	fun getSelectedCharacter() : Flow<Character?> {
+		return characterDao.getCharacterById(_selectedCharacterId.value)
 	}
 
 	fun getCharacterById(id: Int): Flow<Character?> {
