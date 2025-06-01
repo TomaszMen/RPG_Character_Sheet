@@ -1,55 +1,69 @@
 package com.example.rpg_character_sheet
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class CharacterViewModel(application: Application) : AndroidViewModel(application) {
-    private val scope = CoroutineScope(Dispatchers.IO)
-    private val characterDao = CharacterDatabase.getDatabase(application).characterDao()
-    private val languageDao  = LanguageDatabase.getDatabase(application).languageDao()
-    val allCharacters: LiveData<List<Character>> = characterDao.getAllCharacters()
+// Tables
+import table_entities.Character
 
-    fun getCharacterById(id: Int): LiveData<Character> = characterDao.getCharacterById(id)
 
-    fun insertCharacter(character: Character) {
-        scope.launch { characterDao.insert(character) }
-    }
+// Creates the CharacterViewModel instance inside UI elements so it doesn't need to passed as an argument
+class CharacterViewModelFactory(private val application: Application) : ViewModelProvider.Factory {
+	override fun <T : ViewModel> create(modelClass: Class<T>): T {
+		return CharacterViewModel(application) as T
+	}
+}
 
-    fun updateCharacter(character: Character) {
-        scope.launch { characterDao.update(character) }
-    }
+class CharacterViewModel(application: Application) : ViewModel() {
+	// Data access objects
+	private val characterDao: CharacterDao = CharacterDatabase.getDatabase(application).characterDao()
 
-    fun delete(character: Character) {
-        scope.launch { characterDao.delete(character) }
-    }
+	// Allows reading and writing data
+	private val _characters = MutableStateFlow<List<Character>>(emptyList())
 
-    override fun onCleared() {
-        super.onCleared()
-    }
+	// Allows only reading the data
+	val characters: StateFlow<List<Character>> get() = _characters
 
-    fun getAllCharacters(): Any {
-        return allCharacters;
-    }
 
-    fun insertCharacterWithLanguages(character: Character, languages: List<String>) {
-        viewModelScope.launch {
-            val characterId = dao.insert(character).toInt()
-            languages.forEach { language ->
-                dao.insertLanguage(LanguageDatabase(characterId = characterId, language = language))
-            }
-        }
-    }
+	// Called upon creation of each instance
+	init {
+		fetchData()
+	}
 
-    fun updateCharacterLanguages(characterId: Int, newLanguages: List<String>) {
-        viewModelScope.launch {
-            dao.deleteAllLanguagesForCharacter(characterId)
-            newLanguages.forEach { language ->
-                dao.insertLanguage(LanguageDatabase(characterId = characterId, language = language))
-            }
-        }
-    }
+	private fun fetchData() {
+		viewModelScope.launch {
+			// Fetch characters
+			characterDao.getAllCharacters().collect { characterList ->
+				_characters.value = characterList
+			}
+		}
+	}
+
+	fun getCharacterById(id: Int): Flow<Character?> {
+		return characterDao.getCharacterById(id)
+	}
+
+	fun insertCharacter(character: Character) {
+		viewModelScope.launch {
+			characterDao.insert(character)
+		}
+	}
+
+	fun updateCharacter(character: Character) {
+		viewModelScope.launch {
+			characterDao.update(character)
+		}
+	}
+
+	fun deleteCharacter(character: Character) {
+		viewModelScope.launch {
+			characterDao.delete(character)
+		}
+	}
 }

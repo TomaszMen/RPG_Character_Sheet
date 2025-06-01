@@ -1,5 +1,5 @@
 package com.example.rpg_character_sheet
-
+/*
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
@@ -62,3 +62,4 @@ class PlayCharacterActivity : AppCompatActivity() {
         }
     }
 }
+*/

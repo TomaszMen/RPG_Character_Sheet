@@ -34,7 +34,7 @@ import androidx.navigation.NavHostController
 
 @Composable
 fun CharactersScreen(navController: NavHostController) {
-	val viewModel: CharacterViewModel2 = viewModel(
+	val viewModel: CharacterViewModel = viewModel(
 		LocalViewModelStoreOwner.current!!,
 		"CharacterViewModel2",
 		CharacterViewModelFactory(LocalContext.current.applicationContext as Application)
@@ -67,7 +67,7 @@ fun CharactersScreen(navController: NavHostController) {
 						.clickable {  // Action to take upon clicking on one of the items
 							navController.navigate(
 								Screens.CharacterEditScreen.createRoute(
-									characters[it].id
+									characters[it].characterId
 								)
 							)
 						}
@@ -75,16 +75,10 @@ fun CharactersScreen(navController: NavHostController) {
 
 				) {
 					// Content of the item
-					(if (characters[it].name != null) {
-						characters[it].name
-					} else {
-						"Name not found"
-					})?.let { text ->
-						Text(
-							text = text,
-							fontSize = 20.sp
-						)
-					}
+					Text(
+						text = characters[it].characterName,
+						fontSize = 20.sp
+					)
 				}
 			}
 		}
@@ -93,7 +87,7 @@ fun CharactersScreen(navController: NavHostController) {
 
 @Composable
 fun CharacterAddScreen(navController: NavHostController) {
-	val viewModel: CharacterViewModel2 = viewModel(
+	val viewModel: CharacterViewModel = viewModel(
 		LocalViewModelStoreOwner.current!!,
 		"CharacterViewModel2",
 		CharacterViewModelFactory(LocalContext.current.applicationContext as Application)
@@ -121,7 +115,7 @@ fun CharacterAddScreen(navController: NavHostController) {
 
 @Composable
 fun CharacterEditScreen(characterId: Int, navController: NavHostController) {
-	val viewModel: CharacterViewModel2 = viewModel(
+	val viewModel: CharacterViewModel = viewModel(
 		LocalViewModelStoreOwner.current!!,
 		"CharacterViewModel2",
 		CharacterViewModelFactory(LocalContext.current.applicationContext as Application)

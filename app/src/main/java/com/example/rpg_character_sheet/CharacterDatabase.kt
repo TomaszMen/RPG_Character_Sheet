@@ -62,7 +62,6 @@ import table_entities.ClassSpell
 
 abstract class CharacterDatabase : RoomDatabase() {
     abstract fun characterDao(): CharacterDao
-    abstract fun characterDao2(): CharacterDao2
 
     companion object {
         @Volatile

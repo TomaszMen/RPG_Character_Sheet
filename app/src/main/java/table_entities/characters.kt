@@ -9,7 +9,7 @@ import androidx.room.PrimaryKey
     tableName = "characters",
     indices = [
         Index(value = ["characterName"], name = "idx_character_name"),
-        Index(value = ["playerName"], name = "idx_character_player")
+        //Index(value = ["playerName"], name = "idx_character_player")
     ],
     foreignKeys = [
         ForeignKey(
