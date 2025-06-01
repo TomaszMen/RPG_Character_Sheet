@@ -8,8 +8,7 @@ import androidx.room.PrimaryKey
 @Entity(
     tableName = "characters",
     indices = [
-        Index(value = ["characterName"], name = "idx_character_name"),
-        //Index(value = ["playerName"], name = "idx_character_player")
+        Index(value = ["characterName"], name = "idx_character_name")
     ],
     foreignKeys = [
         ForeignKey(
@@ -60,7 +59,6 @@ data class Character(
     val subclassId: Int? = null,
     val backgroundId: Int,
     val alignmentId: Int,
-    val experiencePoints: Int = 0,
     val level: Int = 1,
     val inspiration: Boolean = false,
     val strength: Int = 10,

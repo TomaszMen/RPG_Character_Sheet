@@ -78,7 +78,7 @@ abstract class CharacterDatabase : RoomDatabase() {
                     context.applicationContext,
                     CharacterDatabase::class.java,
                     "character_database"
-                )
+                )   .fallbackToDestructiveMigration()
                     .addMigrations(MIGRATION_1_2)
                     .build()
                 INSTANCE = instance

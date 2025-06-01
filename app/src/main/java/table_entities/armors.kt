@@ -6,7 +6,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "armor",
+    tableName = "armors",
     indices = [
         Index(value = ["armorType"], name = "idx_armor_type")
     ],
