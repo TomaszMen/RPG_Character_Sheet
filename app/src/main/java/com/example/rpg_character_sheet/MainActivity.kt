@@ -22,7 +22,7 @@ import com.example.rpg_character_sheet.ui.theme.CharacterSheetTheme
 
 class MainActivity : AppCompatActivity() {
 
-    // New UI
+    // New  UI
 //    override fun onCreate(savedInstanceState: Bundle?) {
 //        super.onCreate(savedInstanceState)
 //        enableEdgeToEdge()
