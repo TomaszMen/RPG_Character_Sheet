@@ -38,7 +38,8 @@ android {
 
 dependencies {
 
-    val roomVersion = "2.6.1" // or the latest version
+    implementation(libs.androidx.adapters)
+    //val roomVersion = "2.6.1" // or the latest version
 
     implementation(libs.androidx.room.runtime)
     annotationProcessor(libs.androidx.room.room.compiler)
@@ -53,4 +54,8 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.androidx.room.ktx)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.annotation)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+
 }
