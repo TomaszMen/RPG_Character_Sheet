@@ -28,39 +28,28 @@ import table_entities.Race
 import table_entities.Language
 import table_entities.ClassSpell
 
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.Query
+import androidx.room.Update
+import kotlinx.coroutines.flow.Flow
+
+
 @Dao
-interface CharacterDao {
-    @Query("SELECT * FROM characters")
-    fun getAllCharacters(): LiveData<List<Character>>
-
-    @Query("SELECT * FROM races")
-    fun getAllRaces(): LiveData<List<Race>>
-
-    @Query("SELECT * FROM classes")
-    fun getAllClasses(): LiveData<List<CharacterClass>>
-
-    @Query("SELECT * FROM backgrounds")
-    fun getAllBackgrounds(): LiveData<List<Background>>
-
-    @Query("SELECT * FROM alignments")
-    fun getAllAlignments(): LiveData<List<Alignment>>
-
-    @Query("SELECT * FROM characters WHERE characterId = :id")
-    fun getCharacterById(id: Int): LiveData<Character>
-
-    @Query("SELECT * FROM subraces WHERE raceId = :raceId")
-    suspend fun getSubracesByRaceId(raceId: Int): List<Subrace>
-
-    @Query("SELECT * FROM subclasses WHERE classId = :classId")
-    suspend fun getSubclassesByClassId(classId: Int): List<Subclass>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCharacter(character: java.lang.Character): Long
+interface CharacterDao2 {
+    @Insert
+    suspend fun insert(character: Character)
 
     @Update
-    suspend fun updateCharacter(character: java.lang.Character)
+    suspend fun update(character: Character)
 
     @Delete
-    suspend fun deleteCharacter(character: java.lang.Character)
+    suspend fun delete(character: Character)
 
+    @Query("SELECT * FROM characters ORDER BY characterName ASC")
+    fun getAllCharacters(): Flow<List<Character>>
+
+    @Query("SELECT * FROM characters WHERE characterId = :id")
+    fun getCharacterById(id: Int): Flow<Character?>
 }
