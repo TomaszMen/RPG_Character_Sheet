@@ -30,7 +30,7 @@ class CharacterViewModel(application: Application) : ViewModel() {
 
 	// Allows only reading the data
 	val characters: StateFlow<List<Character>> get() = _characters
-	//val selectedCharacterId: StateFlow<Int?> get() = _selectedCharacterId
+	val selectedCharacterId: StateFlow<Int?> get() = _selectedCharacterId
 
 
 	// Called upon creation of each instance
@@ -39,12 +39,12 @@ class CharacterViewModel(application: Application) : ViewModel() {
 	}
 
 	private fun fetchData() {
-		//viewModelScope.launch {
-		//	// Fetch characters
-		//	characterDao.getAllCharacters().collect { characterList ->
-		//		_characters.value = characterList
-		//	}
-		//}
+		viewModelScope.launch {
+			// Fetch characters
+			characterDao.getAllCharacters().collect { characterList ->
+				_characters.value = characterList
+			}
+		}
 	}
 
 	fun selectCharacter(id: Int) {
@@ -60,20 +60,20 @@ class CharacterViewModel(application: Application) : ViewModel() {
 	}
 
 	fun insertCharacter(character: Character) {
-		//viewModelScope.launch {
-		//	characterDao.insert(character)
-		//}
+		viewModelScope.launch {
+			characterDao.insert(character)
+		}
 	}
 
 	fun updateCharacter(character: Character) {
-		//viewModelScope.launch {
-		//	characterDao.update(character)
-		//}
+		viewModelScope.launch {
+			characterDao.update(character)
+		}
 	}
 
 	fun deleteCharacter(character: Character) {
-		//viewModelScope.launch {
-		//	characterDao.delete(character)
-		//}
+		viewModelScope.launch {
+			characterDao.delete(character)
+		}
 	}
 }
