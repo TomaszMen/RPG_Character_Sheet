@@ -30,7 +30,7 @@ class CharacterViewModel(application: Application) : ViewModel() {
 
 	// Allows only reading the data
 	val characters: StateFlow<List<Character>> get() = _characters
-	//val selectedCharacterId: StateFlow<Int?> get() = _selectedCharacterId
+	//val selectedCharacterId: StateFlow<Int> get() = _selectedCharacterId
 
 
 	// Called upon creation of each instance
