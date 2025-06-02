@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 // Tables
@@ -26,11 +27,11 @@ class CharacterViewModel(application: Application) : ViewModel() {
 
 	// Allows reading and writing data
 	private val _characters = MutableStateFlow<List<Character>>(emptyList())
-	private val _selectedCharacterId = MutableStateFlow(0)
+	private val _selectedCharacterId = MutableStateFlow(1)
 
 	// Allows only reading the data
 	val characters: StateFlow<List<Character>> get() = _characters
-	//val selectedCharacterId: StateFlow<Int> get() = _selectedCharacterId
+	val selectedCharacterId: StateFlow<Int> get() = _selectedCharacterId
 
 
 	// Called upon creation of each instance
@@ -52,6 +53,7 @@ class CharacterViewModel(application: Application) : ViewModel() {
 	}
 
 	fun getSelectedCharacter() : Flow<Character?> {
+		//return combine(_characters, _selectedCharacterId) { list, id -> list[id] }
 		return characterDao.getCharacterById(_selectedCharacterId.value)
 	}
 

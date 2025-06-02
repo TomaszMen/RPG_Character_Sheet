@@ -1,5 +1,6 @@
 package com.example.rpg_character_sheet
 
+import android.app.Application
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -15,9 +16,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -34,13 +39,18 @@ import androidx.navigation.navArgument
 fun Navigation() {
     val navController = rememberNavController()
 
+	val application = LocalContext.current.applicationContext as Application
+	val viewModelFactory = remember { CharacterViewModelFactory(application) }
+	val viewModel: CharacterViewModel = viewModel(factory = viewModelFactory)
+
+
     Scaffold(
-		bottomBar = { BottomMenu(navController = navController) },
+		bottomBar = { BottomMenu(viewModel, navController) },
         content = { innerPadding ->
             Box(
 				modifier = Modifier.padding(innerPadding)
             ) {
-                NavGraph(navController = navController)
+                NavGraph(viewModel, navController)
             }
 		}
     )
@@ -58,7 +68,7 @@ sealed class BottomBar(
     )
 
     data object CharacterDetailsScreen : BottomBar(
-        Screens.CharacterDetailsScreen.route,
+        Screens.CharacterDetailsScreen.route,  // Don't use it, instead use the createRoute method directly
         "Details",
         Icons.Default.AccountCircle
     )
@@ -83,9 +93,8 @@ sealed class BottomBar(
 }
 
 @Composable
-fun BottomMenu(navController: NavHostController) {
+fun BottomMenu(viewModel: CharacterViewModel, navController: NavHostController) {
     val selectedCharacterScreens = listOf(
-        BottomBar.CharacterDetailsScreen,
         BottomBar.CharacterEquipmentScreen,
         BottomBar.CharacterActionsScreen,
         BottomBar.CharacterPlayScreen
@@ -105,6 +114,18 @@ fun BottomMenu(navController: NavHostController) {
             onClick = { navController.navigate(BottomBar.CharactersScreen.route) }
         )
 
+		NavigationBarItem(
+			label = { Text(text = BottomBar.CharacterDetailsScreen.title) },
+			icon = { Icon(imageVector = BottomBar.CharacterDetailsScreen.icon, contentDescription = "icon") },
+			enabled = currentDestination?.route != BottomBar.CharactersScreen.route &&
+					currentDestination?.route != Screens.CharacterAddScreen.route &&
+					currentDestination?.route != Screens.CharacterEditScreen.route,
+			selected = currentDestination?.route == BottomBar.CharacterDetailsScreen.route,
+			onClick = { navController.navigate(
+				Screens.CharacterDetailsScreen.createRoute(viewModel.selectedCharacterId.value)
+			) }
+		)
+
         selectedCharacterScreens.forEach { screen ->
             NavigationBarItem(
                 label = { Text(text = screen.title) },
@@ -121,38 +142,38 @@ fun BottomMenu(navController: NavHostController) {
 
 // Specifies how each route is taken
 @Composable
-fun NavGraph(navController: NavHostController) {
+fun NavGraph(viewModel: CharacterViewModel, navController: NavHostController) {
     NavHost(
         navController = navController,
         startDestination = Screens.CharactersScreen.route
     ) {
         // Navigating to CharactersScreen
-        composable(route = Screens.CharactersScreen.route) { CharactersScreen(navController) }
+        composable(route = Screens.CharactersScreen.route) { CharactersScreen(viewModel, navController) }
 
 		// Navigating to CharacterDetailsScreen
 		composable(
 			route = Screens.CharacterDetailsScreen.route,
-			arguments = listOf(navArgument("characterId") { type = NavType.StringType })
+			arguments = listOf(navArgument("characterId") { type = NavType.IntType })
 		) { backStackEntry ->
 			val id = backStackEntry.arguments?.getInt("characterId")
 			if (id != null) {
-				CharacterDetailsScreen(id, navController)
+				CharacterDetailsScreen(id, viewModel, navController)
 			}
 		}
 
 		// Navigating to CharacterEquipmentScreen
-		composable(route = Screens.CharacterEquipmentScreen.route) { CharacterEquipmentScreen(navController) }
+		composable(route = Screens.CharacterEquipmentScreen.route) { CharacterEquipmentScreen(viewModel, navController) }
 
 		// Navigating to CharacterActionsScreen
-		composable(route = Screens.CharacterActionsScreen.route) { CharacterActionsScreen(navController) }
+		composable(route = Screens.CharacterActionsScreen.route) { CharacterActionsScreen(viewModel, navController) }
 
 		// Navigating to CharacterPlayScreen
-		composable(route = Screens.CharacterPlayScreen.route) { CharacterPlayScreen(navController) }
+		composable(route = Screens.CharacterPlayScreen.route) { CharacterPlayScreen(viewModel, navController) }
 
 		// Navigating to CharacterAddScreen
-		composable(route = Screens.CharacterAddScreen.route) { CharacterAddScreen(navController) }
+		composable(route = Screens.CharacterAddScreen.route) { CharacterAddScreen(viewModel, navController) }
 
         // Navigating to CharacterEditScreen
-        composable(route = Screens.CharacterEditScreen.route) { CharacterEditScreen(navController) }
+        composable(route = Screens.CharacterEditScreen.route) { CharacterEditScreen(viewModel, navController) }
     }
 }

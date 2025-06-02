@@ -35,12 +35,7 @@ import table_entities.Character
 
 // Accessible from bottom bar
 @Composable
-fun CharactersScreen(navController: NavHostController) {
-	val viewModel: CharacterViewModel = viewModel(
-		LocalViewModelStoreOwner.current!!,
-		"CharacterViewModel",
-		CharacterViewModelFactory(LocalContext.current.applicationContext as Application)
-	)
+fun CharactersScreen(viewModel: CharacterViewModel, navController: NavHostController) {
 	val characters by viewModel.characters.collectAsStateWithLifecycle()
 
 	Scaffold(
@@ -86,55 +81,41 @@ fun CharactersScreen(navController: NavHostController) {
 }
 
 @Composable
-fun CharacterDetailsScreen(characterId: Int, navController: NavHostController) {
-	val viewModel: CharacterViewModel = viewModel(
-		LocalViewModelStoreOwner.current!!,
-		"CharacterViewModel",
-		CharacterViewModelFactory(LocalContext.current.applicationContext as Application)
-	)
+fun CharacterDetailsScreen(characterId: Int, viewModel: CharacterViewModel, navController: NavHostController) {
 	viewModel.selectCharacter(characterId)
 	val character = viewModel.getSelectedCharacter().collectAsState(initial = null).value
+
+	if (character != null) {
+		Text(text = character.characterName)
+	} else {
+		Text(text = "Dumbass")
+	}
 }
 
 @Composable
-fun CharacterEquipmentScreen(navController: NavHostController) {
-	val viewModel: CharacterViewModel = viewModel(
-		LocalViewModelStoreOwner.current!!,
-		"CharacterViewModel",
-		CharacterViewModelFactory(LocalContext.current.applicationContext as Application)
-	)
+fun CharacterEquipmentScreen(viewModel: CharacterViewModel, navController: NavHostController) {
+	val character = viewModel.getSelectedCharacter().collectAsState(initial = null).value
+
+	if (character != null) {
+		Text(text = character.characterName)
+	} else {
+		Text(text = "Dumbass")
+	}
+}
+
+@Composable
+fun CharacterActionsScreen(viewModel: CharacterViewModel, navController: NavHostController) {
 	val character = viewModel.getSelectedCharacter().collectAsState(initial = null).value
 }
 
 @Composable
-fun CharacterActionsScreen(navController: NavHostController) {
-	val viewModel: CharacterViewModel = viewModel(
-		LocalViewModelStoreOwner.current!!,
-		"CharacterViewModel",
-		CharacterViewModelFactory(LocalContext.current.applicationContext as Application)
-	)
-	val character = viewModel.getSelectedCharacter().collectAsState(initial = null).value
-}
-
-@Composable
-fun CharacterPlayScreen(navController: NavHostController) {
-	val viewModel: CharacterViewModel = viewModel(
-		LocalViewModelStoreOwner.current!!,
-		"CharacterViewModel",
-		CharacterViewModelFactory(LocalContext.current.applicationContext as Application)
-	)
+fun CharacterPlayScreen(viewModel: CharacterViewModel, navController: NavHostController) {
 	val character = viewModel.getSelectedCharacter().collectAsState(initial = null).value
 }
 
 // Not accessible from bottom bar
 @Composable
-fun CharacterAddScreen(navController: NavHostController) {
-	val viewModel: CharacterViewModel = viewModel(
-		LocalViewModelStoreOwner.current!!,
-		"CharacterViewModel",
-		CharacterViewModelFactory(LocalContext.current.applicationContext as Application)
-	)
-
+fun CharacterAddScreen(viewModel: CharacterViewModel, navController: NavHostController) {
 	// var all enterable fields
 
 	Scaffold(
@@ -156,12 +137,7 @@ fun CharacterAddScreen(navController: NavHostController) {
 }
 
 @Composable
-fun CharacterEditScreen(navController: NavHostController) {
-	val viewModel: CharacterViewModel = viewModel(
-		LocalViewModelStoreOwner.current!!,
-		"CharacterViewModel",
-		CharacterViewModelFactory(LocalContext.current.applicationContext as Application)
-	)
+fun CharacterEditScreen(viewModel: CharacterViewModel, navController: NavHostController) {
 	val character = viewModel.getSelectedCharacter().collectAsState(initial = null).value
 
 	// var all enterable fields
