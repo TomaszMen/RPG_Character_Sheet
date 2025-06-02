@@ -67,10 +67,11 @@ fun CharactersScreen(navController: NavHostController) {
 						.padding(8.dp)  // Padding of items
 						.shadow(4.dp, shape = RoundedCornerShape(8.dp), clip = true)
 						.clickable {  // Action to take upon clicking on one of the items
-							navController.navigate(Screens.CharacterEditScreen.route)
+							navController.navigate(
+								Screens.CharacterDetailsScreen.createRoute(characters[it].characterId)
+							)
 						}
 						.padding(8.dp)  // Inner padding of the content
-
 				) {
 					// Content of the item
 					Text(
