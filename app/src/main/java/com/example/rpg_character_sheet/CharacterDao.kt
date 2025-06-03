@@ -61,4 +61,19 @@ interface CharacterDao {
     // Race queries
     @Query("SELECT * FROM races WHERE raceId = :raceId")
     fun getRaceById(raceId: Int): Flow<Race?>
+
+    @Query("SELECT * FROM items")
+    fun getAllItems(): Flow<List<Item>>
+
+    @Query("SELECT * FROM character_inventory WHERE characterId = :characterId")
+    fun getCharacterInventory(characterId: Int): Flow<List<CharacterInventory>>
+
+    @Insert
+    suspend fun insertCharacterInventory(characterInventory: CharacterInventory)
+
+    @Delete
+    suspend fun deleteCharacterInventory(characterInventory: CharacterInventory)
+
+    @Update
+    suspend fun updateCharacterInventory(updated: CharacterInventory)
 }
