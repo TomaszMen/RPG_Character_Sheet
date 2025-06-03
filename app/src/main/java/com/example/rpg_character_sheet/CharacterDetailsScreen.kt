@@ -3,7 +3,9 @@ package com.example.rpg_character_sheet
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -31,43 +33,50 @@ fun CharacterDetailsScreen(characterId: Int, viewModel: CharacterViewModel, navC
 			horizontalAlignment = Alignment.CenterHorizontally
 		) {
 			// Name
-			Text(
-				text = character.characterName,
-				fontSize = 20.sp,
-				fontWeight = FontWeight.Bold,
-				textAlign = TextAlign.Center
+			OutlinedTextField(
+				value = character.characterName,
+				onValueChange = { viewModel.updateCharacterName(character, it) },
+				label = { Text("Name") },
+				modifier = Modifier.fillMaxWidth()
 			)
 
 			// Race
-			val characterRace by viewModel.getRaceById(character.raceId).collectAsState(initial = null)
-			Text(
-				text = characterRace?.raceName ?: "No race",
-				fontSize = 15.sp,
-				textAlign = TextAlign.Center
-			)
-
-			// Subrace
-			if (character.subraceId != null) {
-				val characterSubrace by viewModel.getSubraceById(character.subraceId).collectAsState(initial = null)
-				Text(
-					text = characterSubrace?.subraceName ?: "No subrace",
-					fontSize = 15.sp,
-					textAlign = TextAlign.Center
-				)
-
-				//val subraces by viewModel.getSubracesOfRaceAsPairs(character.raceId).collectAsState(initial = null)
-				//val subracePair by viewModel.getSubraceByIdAsPair(character.subraceId).collectAsState(initial = null)
-
-				//Spinner(subraces!!, subracePair!!) {  }
-			} else {
-				Text(
-					text = "No subrace",
-					fontSize = 15.sp,
-					textAlign = TextAlign.Center
-				)
+			val characterRace by viewModel.getRaceByIdAsPair(character.raceId).collectAsState(initial = null)
+			val races by viewModel.getAllRacesAsPairs().collectAsState(initial = null)
+			if (races != null && characterRace != null) {
+				Spinner(races, characterRace, "Race") {
+					viewModel.updateCharacterRace(character, it.first)
+					viewModel.updateCharacterSubrace(character, 30)  // Set to no subrace
+				}
 			}
 
-			//
+			// Subrace
+			val characterSubrace by viewModel.getSubraceByIdAsPair(character.subraceId).collectAsState(initial = null)
+			val subraces by viewModel.getSubracesOfRaceAsPairs(character.raceId).collectAsState(initial = null)
+			if (subraces != null && characterSubrace != null) {
+				Spinner(subraces, characterSubrace, "Subrace") {
+					viewModel.updateCharacterSubrace(character, it.first)
+				}
+			}
+
+			// Class
+			val characterClass by viewModel.getClassByIdAsPair(character.classId).collectAsState(initial = null)
+			val classes by viewModel.getAllClassesAsPair().collectAsState(initial = null)
+			if (characterClass != null && classes != null) {
+				Spinner(classes, characterClass, "Class") {
+					viewModel.updateCharacterClass(character, it.first)
+					viewModel.updateCharacterSubclass(character, 41)  // Set to no subclass
+				}
+			}
+
+			// Subclass
+			val characterSubclass by viewModel.getSubclassByIdAsPair(character.subclassId).collectAsState(initial = null)
+			val subclasses by viewModel.getSubclassesOfClassAsPairs(character.classId).collectAsState(initial = null)
+			if (characterSubclass != null && subclasses != null) {
+				Spinner(subclasses, characterSubclass, "Class") {
+					viewModel.updateCharacterSubclass(character, it.first)
+				}
+			}
 
 
 		}

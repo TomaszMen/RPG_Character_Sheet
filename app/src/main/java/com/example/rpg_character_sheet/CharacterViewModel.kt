@@ -51,11 +51,11 @@ class CharacterViewModel(application: Application) : ViewModel() {
 		_selectedCharacterId.value = characterId
 	}
 
-	fun getSelectedCharacter() : Flow<Character?> {
+	fun getSelectedCharacter() : Flow<Character> {
 		return characterDao.getCharacterById(_selectedCharacterId.value)
 	}
 
-	fun getCharacterById(characterId: Int): Flow<Character?> {
+	fun getCharacterById(characterId: Int): Flow<Character> {
 		return characterDao.getCharacterById(characterId)
 	}
 
@@ -68,6 +68,12 @@ class CharacterViewModel(application: Application) : ViewModel() {
 	fun updateCharacter(character: Character) {
 		viewModelScope.launch {
 			characterDao.update(character)
+		}
+	}
+
+	fun updateCharacterName(character: Character, newName: String) {
+		viewModelScope.launch {
+			characterDao.updateCharacterName(character.characterId, newName)
 		}
 	}
 
@@ -84,29 +90,90 @@ class CharacterViewModel(application: Application) : ViewModel() {
 	}
 
 	// Classes
-	fun getClassById(classId: Int): Flow<CharacterClass?> {
+	fun getClassById(classId: Int): Flow<CharacterClass> {
 		return characterDao.getClassById(classId)
 	}
 
+	fun getClassByIdAsPair(classId: Int): Flow<Pair<Int, String>> {
+		return characterDao.getClassById(classId).map { it.classId to it.className }
+	}
+
+	fun getAllClassesAsPair(): Flow<List<Pair<Int, String>>> {
+		return characterDao.getAllClasses().map { characterClass ->
+			characterClass.map { it.classId to it.className }
+		}
+	}
+
+	fun updateCharacterClass(character: Character, newClassId: Int) {
+		viewModelScope.launch {
+			characterDao.updateCharacterClass(character.characterId, newClassId)
+		}
+	}
+
+	// Subclasses
+	fun getSubclassByIdAsPair(subclassId: Int): Flow<Pair<Int, String>> {
+		return characterDao.getSubclassById(subclassId).map { it.subclassId to it.subclassName }
+	}
+
+	fun getAllSubclasses(): Flow<List<Subclass>> {
+		return characterDao.getAllSubclasses()
+	}
+
+	fun getSubclassesOfClassAsPairs(classId: Int): Flow<List<Pair<Int, String>>> {
+		return characterDao.getSubclassesOfClass(classId).map { subclass ->
+			subclass.map { it.subclassId to it.subclassName }
+		}
+	}
+
+	fun updateCharacterSubclass(character: Character, newSubclassId: Int) {
+		viewModelScope.launch {
+			characterDao.updateCharacterSubclass(character.characterId, newSubclassId)
+		}
+	}
+
 	// Races
-	fun getRaceById(raceId: Int): Flow<Race?> {
+	fun getRaceById(raceId: Int): Flow<Race> {
 		return characterDao.getRaceById(raceId)
 	}
 
+	fun getRaceByIdAsPair(raceId: Int): Flow<Pair<Int, String>> {
+		return characterDao.getRaceById(raceId).map { it.raceId to it.raceName }
+	}
+
+	fun getAllRacesAsPairs(): Flow<List<Pair<Int, String>>> {
+		return characterDao.getAllRaces().map { race ->
+			race.map { it.raceId to it.raceName }
+		}
+	}
+
+	fun updateCharacterRace(character: Character, newRaceId: Int) {
+		viewModelScope.launch {
+			characterDao.updateCharacterRace(character.characterId, newRaceId)
+		}
+	}
+
 	// Subraces
-	fun getSubraceById(subraceId: Int): Flow<Subrace?> {
+	fun getSubraceById(subraceId: Int): Flow<Subrace> {
 		return characterDao.getSubraceById(subraceId)
 	}
 
-	fun getSubraceByIdAsPair(subraceId: Int): Flow<Pair<Int?, String>> {
-		val subrace = characterDao.getSubraceById(subraceId)
-
-		return subrace.map { it?.subraceId to (it?.subraceName ?: "No subrace") }
+	fun getAllSubraces(): Flow<List<Subrace>> {
+		return characterDao.getAllSubraces()
 	}
 
-//	fun getSubracesOfRaceAsPairs(raceId: Int): Flow<List<Pair<Int, String>>> {
-//		return characterDao.getSubracesOfRace(raceId).map { subrace ->
-//			subrace.map { it.subraceId to it.subraceName }
-//		}
-//	}
+	fun getSubraceByIdAsPair(subraceId: Int): Flow<Pair<Int, String>> {
+		return characterDao.getSubraceById(subraceId).map { it.subraceId to it.subraceName }
+	}
+
+	fun getSubracesOfRaceAsPairs(raceId: Int): Flow<List<Pair<Int, String>>> {
+		return characterDao.getSubracesOfRace(raceId).map { subrace ->
+			subrace.map { it.subraceId to it.subraceName }
+		}
+	}
+
+	fun updateCharacterSubrace(character: Character, newSubraceId: Int) {
+		viewModelScope.launch {
+			characterDao.updateCharacterSubrace(character.characterId, newSubraceId)
+		}
+	}
 }

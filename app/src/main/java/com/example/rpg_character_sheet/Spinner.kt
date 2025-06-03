@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowDropDown
@@ -28,55 +29,60 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun Spinner(
-	list: List<Pair<Int, String>>,
-	preselected: Pair<Int, String>,
+	list: List<Pair<Int, String>>?,
+	preselected: Pair<Int, String>?,
+	label: String,
 	onSelectionChanged: (selection: Pair<Int, String>) -> Unit
 ) {
+	if (list != null && preselected != null) {
 
-	var selected by remember { mutableStateOf(preselected) }
-	var expanded by remember { mutableStateOf(false) } // initial value
+		var selected by remember { mutableStateOf(preselected) }
+		var expanded by remember { mutableStateOf(false) } // initial value
 
-	Box {
-		Column {
-			OutlinedTextField(
-				value = (selected.second),
-				onValueChange = { },
-				label = { Text(text = "My List") },
-				modifier = Modifier.fillMaxWidth(),
-				trailingIcon = { Icon(Icons.Outlined.ArrowDropDown, null) },
-				readOnly = true
-			)
-			DropdownMenu(
-				modifier = Modifier.fillMaxWidth(),
-				expanded = expanded,
-				onDismissRequest = { expanded = false },
-			) {
-				list.forEach { entry ->
+		Box {
+			Column {
+				OutlinedTextField(
+					value = (selected.second),
+					onValueChange = { },
+					label = { Text(text = label) },
+					modifier = Modifier.fillMaxWidth(),
+					trailingIcon = { Icon(Icons.Outlined.ArrowDropDown, null) },
+					readOnly = true
+				)
+				DropdownMenu(
+					modifier = Modifier.fillMaxWidth(),
+					expanded = expanded,
+					onDismissRequest = { expanded = false },
+				) {
+					list.forEach { entry ->
 
-					DropdownMenuItem(
-						modifier = Modifier.fillMaxWidth(),
-						onClick = {
-							selected = entry
-							expanded = false
-						},
-						text = {
-							Text(
-								text = (entry.second),
-								modifier = Modifier.wrapContentWidth().align(Alignment.Start))
-						}
-					)
+						DropdownMenuItem(
+							modifier = Modifier.fillMaxWidth(),
+							onClick = {
+								selected = entry
+								expanded = false
+								onSelectionChanged(entry)
+							},
+							text = {
+								Text(
+									text = (entry.second),
+									modifier = Modifier.wrapContentWidth().align(Alignment.Start)
+								)
+							}
+						)
+					}
 				}
 			}
-		}
 
-		Spacer(
-			modifier = Modifier
-				.matchParentSize()
-				.background(Color.Transparent)
-				.padding(10.dp)
-				.clickable(
-					onClick = { expanded = !expanded }
-				)
-		)
+			Spacer(
+				modifier = Modifier
+					.matchParentSize()
+					.background(Color.Transparent)
+					.padding(10.dp)
+					.clickable(
+						onClick = { expanded = !expanded }
+					)
+			)
+		}
 	}
 }
