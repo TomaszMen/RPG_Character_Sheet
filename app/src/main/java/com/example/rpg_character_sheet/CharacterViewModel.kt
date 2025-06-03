@@ -240,7 +240,7 @@ class CharacterViewModel(application: Application) : ViewModel() {
 	// Stats
 	fun updateCharacterStats(characterId: Int, str: Int, dex: Int, con: Int, int: Int, wis: Int, cha: Int) {
 		viewModelScope.launch {
-			updateCharacterStats(characterId, str, dex, con, int, wis, cha)
+			characterDao.updateCharacterStats(characterId, str, dex, con, int, wis, cha)
 		}
 	}
 }

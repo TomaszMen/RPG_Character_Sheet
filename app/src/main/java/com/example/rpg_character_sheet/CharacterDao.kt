@@ -115,9 +115,24 @@ interface CharacterDao {
     fun getAlignmentById(alignmentId: Int): Flow<Alignment>
 
     // Stats
-    @Query("UPDATE characters SET STRength = :STR, DEXterity = :DEX, CONstitution = :CON," +
+    @Query("UPDATE characters SET strength = :STR, dexterity = :DEX, constitution = :CON, " +
             "intelligence = :INT, wisdom = :WIS, charisma = :CHA WHERE characterId = :characterId")
     suspend fun updateCharacterStats(characterId: Int, STR: Int, DEX: Int, CON: Int, INT: Int, WIS: Int, CHA: Int)
+
+    @Query("UPDATE characters SET dexterity = :DEX WHERE characterId = :characterId")
+    suspend fun updateCharacterDexterity(characterId: Int, DEX: Int)
+
+    @Query("UPDATE characters SET dexterity = :CON WHERE characterId = :characterId")
+    suspend fun updateCharacterConstitution(characterId: Int, CON: Int)
+
+    @Query("UPDATE characters SET dexterity = :INT WHERE characterId = :characterId")
+    suspend fun updateCharacterIntelligence(characterId: Int, INT: Int)
+
+    @Query("UPDATE characters SET dexterity = :WIS WHERE characterId = :characterId")
+    suspend fun updateCharacterWisdom(characterId: Int, WIS: Int)
+
+    @Query("UPDATE characters SET dexterity = :CHA WHERE characterId = :characterId")
+    suspend fun updateCharacterCharisma(characterId: Int, CHA: Int)
 
     @Query("SELECT * FROM items")
     fun getAllItems(): Flow<List<Item>>
