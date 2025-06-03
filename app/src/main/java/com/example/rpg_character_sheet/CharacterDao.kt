@@ -76,4 +76,25 @@ interface CharacterDao {
 
     @Update
     suspend fun updateCharacterInventory(updated: CharacterInventory)
+
+    @Transaction
+    @Query(" SELECT * FROM weapons WHERE itemId IN ( SELECT itemId FROM character_inventory WHERE characterId = :characterId AND equipped = 1)")
+    fun getCharacterWeapons(characterId: Int): Flow<List<WeaponAndItem>>
+
+    @Query("SELECT s.* FROM spells s JOIN character_spells cs ON s.spellId = cs.spellId WHERE cs.characterId = :characterId")
+    fun getCharacterSpells(characterId: Int): Flow<List<Spell>>
+
+    @Query("SELECT f.* FROM features f JOIN character_features cf ON f.featureId = cf.featureId WHERE cf.characterId = :characterId")
+    fun getCharacterFeatures(characterId: Int): Flow<List<Feature>>
+
+    @Query("SELECT * FROM character_spell_slots WHERE characterId = :characterId")
+    fun getCharacterSpellSlots(characterId: Int): Flow<List<CharacterSpellSlot>>
 }
+data class WeaponAndItem(
+    @Embedded val weapon: Weapon,
+    @Relation(
+        parentColumn = "itemId",
+        entityColumn = "itemId"
+    )
+    val item: Item
+)

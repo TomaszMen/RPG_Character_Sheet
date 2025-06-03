@@ -22,7 +22,7 @@ import androidx.room.PrimaryKey
 data class Subclass(
     @PrimaryKey(autoGenerate = true)
     val subclassId: Int = 0,
-    val classId: Int,
+    val classId: Int? = null,
     val subclassName: String,
     val description: String? = null
 )

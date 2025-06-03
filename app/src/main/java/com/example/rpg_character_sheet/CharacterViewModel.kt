@@ -129,4 +129,20 @@ class CharacterViewModel(application: Application) : ViewModel() {
 			}
 		}
 	}
+
+	fun getCharacterWeapons(characterId: Int): Flow<List<WeaponAndItem>> {
+		return characterDao.getCharacterWeapons(characterId)
+	}
+
+	fun getCharacterSpells(characterId: Int): Flow<List<Spell>> {
+		return characterDao.getCharacterSpells(characterId)
+	}
+
+	fun getCharacterFeatures(characterId: Int): Flow<List<Feature>> {
+		return characterDao.getCharacterFeatures(characterId)
+	}
+
+	fun getCharacterSpellSlots(characterId: Int): Flow<List<CharacterSpellSlot>> {
+		return characterDao.getCharacterSpellSlots(characterId)
+	}
 }
