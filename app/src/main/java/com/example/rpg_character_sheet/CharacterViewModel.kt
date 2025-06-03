@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import table_entities.*
 
@@ -134,6 +133,65 @@ class CharacterViewModel(application: Application) : ViewModel() {
 	// Races
 	fun getRaceById(raceId: Int): Flow<Race> {
 		return characterDao.getRaceById(raceId)
+	}
+
+	fun getAllItems(): Flow<List<Item>> {
+		return characterDao.getAllItems()
+	}
+
+	fun getCharacterInventory(characterId: Int): Flow<List<CharacterInventory>> {
+		return characterDao.getCharacterInventory(characterId)
+	}
+
+	fun addItemToInventory(characterId: Int, itemId: Int) {
+		viewModelScope.launch {
+			// Check if item already exists in inventory
+			val existing = characterDao.getCharacterInventory(characterId).firstOrNull()?.find { it.itemId == itemId }
+
+			if (existing != null) {
+				// If exists, increment quantity
+				val updated = existing.copy(quantity = existing.quantity + 1)
+				characterDao.updateCharacterInventory(updated)
+			} else {
+				// If not exists, add new entry
+				val newItem = CharacterInventory(
+					characterId = characterId,
+					itemId = itemId,
+					quantity = 1,
+					equipped = false
+				)
+				characterDao.insertCharacterInventory(newItem)
+			}
+		}
+	}
+
+	fun removeItemFromInventory(characterInventory: CharacterInventory) {
+		viewModelScope.launch {
+			if (characterInventory.quantity > 1) {
+				// If more than one, decrement quantity
+				val updated = characterInventory.copy(quantity = characterInventory.quantity - 1)
+				characterDao.updateCharacterInventory(updated)
+			} else {
+				// If only one, remove entirely
+				characterDao.deleteCharacterInventory(characterInventory)
+			}
+		}
+	}
+
+	fun getCharacterWeapons(characterId: Int): Flow<List<WeaponAndItem>> {
+		return characterDao.getCharacterWeapons(characterId)
+	}
+
+	fun getCharacterSpells(characterId: Int): Flow<List<Spell>> {
+		return characterDao.getCharacterSpells(characterId)
+	}
+
+	fun getCharacterFeatures(characterId: Int): Flow<List<Feature>> {
+		return characterDao.getCharacterFeatures(characterId)
+	}
+
+	fun getCharacterSpellSlots(characterId: Int): Flow<List<CharacterSpellSlot>> {
+		return characterDao.getCharacterSpellSlots(characterId)
 	}
 
 	fun getRaceByIdAsPair(raceId: Int): Flow<Pair<Int, String>> {
