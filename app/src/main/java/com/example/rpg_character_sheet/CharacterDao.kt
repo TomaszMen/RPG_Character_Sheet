@@ -54,11 +54,38 @@ interface CharacterDao {
     @Query("SELECT * FROM characters WHERE characterId = :characterId")
     fun getCharacterById(characterId: Int): Flow<Character?>
 
+    @Query("UPDATE characters SET level = :newLevel WHERE characterId = :characterId")
+    suspend fun updateCharacterLevel(characterId: Int, newLevel: Int)
+
     // Class queries
     @Query("SELECT * FROM classes WHERE classId = :classId")
     fun getClassById(classId: Int): Flow<CharacterClass?>
 
+    // Subclass queries
+    @Query("SELECT * FROM subclasses WHERE subclassId = :subclassId")
+    fun getSubclassById(subclassId: Int): Flow<Subclass?>
+
+    //@Query("UPDATE characters SET subclassId")
+
     // Race queries
     @Query("SELECT * FROM races WHERE raceId = :raceId")
     fun getRaceById(raceId: Int): Flow<Race?>
+
+    // Subrace queries
+    @Query("SELECT * FROM subraces WHERE subraceId = :subraceId")
+    fun getSubraceById(subraceId: Int): Flow<Subrace?>
+
+    @Query("SELECT * FROM subraces ORDER BY subraceName ASC")
+    fun getAllSubraces(): Flow<List<Subrace>>
+
+   // @Query("SELECT * FROM subraces JOIN races ON subraces.raceId = races.raceId WHERE raceId = :raceId")
+    //fun getSubracesOfRace(raceId: Int): Flow<List<Subrace>>
+
+    // Background queries
+    @Query("SELECT * FROM backgrounds WHERE backgroundId = :backgroundId")
+    fun getBackgroundById(backgroundId: Int): Flow<Background?>
+
+    // Alignment queries
+    @Query("SELECT * FROM alignments WHERE alignmentId = :alignmentId")
+    fun getAlignmentById(alignmentId: Int): Flow<Alignment?>
 }

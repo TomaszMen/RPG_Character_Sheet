@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import table_entities.*
 
@@ -70,6 +71,12 @@ class CharacterViewModel(application: Application) : ViewModel() {
 		}
 	}
 
+	fun updateCharacterLevel(character: Character, newLevel: Int) {
+		viewModelScope.launch {
+			characterDao.updateCharacterLevel(character.characterId, newLevel)
+		}
+	}
+
 	fun deleteCharacter(character: Character) {
 		viewModelScope.launch {
 			characterDao.delete(character)
@@ -85,4 +92,21 @@ class CharacterViewModel(application: Application) : ViewModel() {
 	fun getRaceById(raceId: Int): Flow<Race?> {
 		return characterDao.getRaceById(raceId)
 	}
+
+	// Subraces
+	fun getSubraceById(subraceId: Int): Flow<Subrace?> {
+		return characterDao.getSubraceById(subraceId)
+	}
+
+	fun getSubraceByIdAsPair(subraceId: Int): Flow<Pair<Int?, String>> {
+		val subrace = characterDao.getSubraceById(subraceId)
+
+		return subrace.map { it?.subraceId to (it?.subraceName ?: "No subrace") }
+	}
+
+//	fun getSubracesOfRaceAsPairs(raceId: Int): Flow<List<Pair<Int, String>>> {
+//		return characterDao.getSubracesOfRace(raceId).map { subrace ->
+//			subrace.map { it.subraceId to it.subraceName }
+//		}
+//	}
 }
