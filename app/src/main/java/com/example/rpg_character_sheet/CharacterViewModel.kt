@@ -176,4 +176,11 @@ class CharacterViewModel(application: Application) : ViewModel() {
 			characterDao.updateCharacterSubrace(character.characterId, newSubraceId)
 		}
 	}
+
+	// Stats
+	fun updateCharacterStats(characterId: Int, str: Int, dex: Int, con: Int, int: Int, wis: Int, cha: Int) {
+		viewModelScope.launch {
+			updateCharacterStats(characterId, str, dex, con, int, wis, cha)
+		}
+	}
 }

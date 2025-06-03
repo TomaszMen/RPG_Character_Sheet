@@ -115,7 +115,7 @@ interface CharacterDao {
     fun getAlignmentById(alignmentId: Int): Flow<Alignment>
 
     // Stats
-    @Query("UPDATE characters SET strength = :str, dexterity = :dex, constitution = :con," +
-            "intelligence = :int, wisdom = :wis, charisma = :cha WHERE characterId = :characterId")
-    suspend fun updateCharacterStats(characterId: Int, str: Int, dex: Int, con: Int, int: Int, wis: Int, cha: Int)
+    @Query("UPDATE characters SET STRength = :STR, DEXterity = :DEX, CONstitution = :CON," +
+            "intelligence = :INT, wisdom = :WIS, charisma = :CHA WHERE characterId = :characterId")
+    suspend fun updateCharacterStats(characterId: Int, STR: Int, DEX: Int, CON: Int, INT: Int, WIS: Int, CHA: Int)
 }

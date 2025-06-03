@@ -2,21 +2,30 @@ package com.example.rpg_character_sheet
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import table_entities.Character
 
 
 @Composable
@@ -78,11 +87,96 @@ fun CharacterDetailsScreen(characterId: Int, viewModel: CharacterViewModel, navC
 				}
 			}
 
+			// Stats
+			val strState = remember { mutableIntStateOf(0) }
+			val dexState = remember { mutableIntStateOf(0) }
+			val conState = remember { mutableIntStateOf(0) }
+			val intState = remember { mutableIntStateOf(0) }
+			val wisState = remember { mutableIntStateOf(0) }
+			val chaState = remember { mutableIntStateOf(0) }
+
+			Row(
+				modifier = Modifier.fillMaxWidth(),
+				horizontalArrangement = Arrangement.SpaceEvenly
+			) {
+				OutlinedTextField(
+					value = character.strength.toString(),
+					onValueChange = {
+						strState.intValue = it.toInt()
+						viewModel.updateCharacterStats(
+							character.characterId, strState.intValue, dexState.intValue, conState.intValue,
+							intState.intValue, wisState.intValue, chaState.intValue
+						)},
+					label = { Text("STR") },
+					modifier = Modifier.width(60.dp)
+				)
+
+				OutlinedTextField(
+					value = character.dexterity.toString(),
+					onValueChange = {
+						dexState.intValue = it.toInt()
+						viewModel.updateCharacterStats(
+							character.characterId, strState.intValue, dexState.intValue, conState.intValue,
+							intState.intValue, wisState.intValue, chaState.intValue
+						)},
+					label = { Text("DEX") },
+					modifier = Modifier.width(60.dp)
+				)
+
+				OutlinedTextField(
+					value = character.constitution.toString(),
+					onValueChange = {
+						conState.intValue = it.toInt()
+						viewModel.updateCharacterStats(
+							character.characterId, strState.intValue, dexState.intValue, conState.intValue,
+							intState.intValue, wisState.intValue, chaState.intValue
+						)},
+					label = { Text("CON") },
+					modifier = Modifier.width(60.dp)
+				)
+
+				OutlinedTextField(
+					value = character.intelligence.toString(),
+					onValueChange = {
+						intState.intValue = it.toInt()
+						viewModel.updateCharacterStats(
+							character.characterId, strState.intValue, dexState.intValue, conState.intValue,
+							intState.intValue, wisState.intValue, chaState.intValue
+						)},
+					label = { Text("INT") },
+					modifier = Modifier.width(60.dp)
+				)
+
+				OutlinedTextField(
+					value = character.wisdom.toString(),
+					onValueChange = {
+						wisState.intValue = it.toInt()
+						viewModel.updateCharacterStats(
+							character.characterId, strState.intValue, dexState.intValue, conState.intValue,
+							intState.intValue, wisState.intValue, chaState.intValue
+						)},
+					label = { Text("WIS") },
+					modifier = Modifier.width(60.dp)
+				)
+
+				OutlinedTextField(
+					value = character.charisma.toString(),
+					onValueChange = {
+						chaState.intValue = it.toInt()
+						viewModel.updateCharacterStats(
+							character.characterId, strState.intValue, dexState.intValue, conState.intValue,
+							intState.intValue, wisState.intValue, chaState.intValue
+						)},
+					label = { Text("CHA") },
+					modifier = Modifier.width(60.dp)
+				)
+			}
+
 
 		}
 	} else {
 		Text(
-			text = "Character not found",
+			text = "Character details not found",
 			textAlign = TextAlign.Center
 		)
 	}
