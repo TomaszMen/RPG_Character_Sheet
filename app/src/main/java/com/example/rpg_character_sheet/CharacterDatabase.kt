@@ -80,7 +80,7 @@ abstract class CharacterDatabase : RoomDatabase() {
                     "character_database"
                 )   .fallbackToDestructiveMigration()
                     .addMigrations(MIGRATION_2_3)
-                    .createFromAsset("project_database.db")
+                    //.createFromAsset("project_database.db")
                     .build()
                 INSTANCE = instance
                 instance

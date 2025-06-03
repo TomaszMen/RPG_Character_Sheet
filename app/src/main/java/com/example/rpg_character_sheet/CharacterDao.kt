@@ -77,9 +77,14 @@ interface CharacterDao {
     @Update
     suspend fun updateCharacterInventory(updated: CharacterInventory)
 
-    @Transaction
-    @Query(" SELECT * FROM weapons WHERE itemId IN ( SELECT itemId FROM character_inventory WHERE characterId = :characterId AND equipped = 1)")
-    fun getCharacterWeapons(characterId: Int): Flow<List<WeaponAndItem>>
+    @Query("""
+    SELECT w.*, i.itemName 
+    FROM weapons w
+    JOIN items i ON w.itemId = i.itemId
+    JOIN character_inventory ci ON i.itemId = ci.itemId
+    WHERE ci.characterId = :characterId AND ci.equipped = 1
+""")
+    fun getCharacterWeapons(characterId: Int): Flow<List<WeaponWithItem>>
 
     @Query("SELECT s.* FROM spells s JOIN character_spells cs ON s.spellId = cs.spellId WHERE cs.characterId = :characterId")
     fun getCharacterSpells(characterId: Int): Flow<List<Spell>>
@@ -89,12 +94,11 @@ interface CharacterDao {
 
     @Query("SELECT * FROM character_spell_slots WHERE characterId = :characterId")
     fun getCharacterSpellSlots(characterId: Int): Flow<List<CharacterSpellSlot>>
+
+    @Update
+    suspend fun updateCharacterSpellSlot(slot: CharacterSpellSlot)
 }
-data class WeaponAndItem(
+data class WeaponWithItem(
     @Embedded val weapon: Weapon,
-    @Relation(
-        parentColumn = "itemId",
-        entityColumn = "itemId"
-    )
-    val item: Item
+    val itemName: String
 )

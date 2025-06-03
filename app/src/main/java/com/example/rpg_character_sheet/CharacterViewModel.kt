@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import table_entities.*
@@ -130,7 +131,7 @@ class CharacterViewModel(application: Application) : ViewModel() {
 		}
 	}
 
-	fun getCharacterWeapons(characterId: Int): Flow<List<WeaponAndItem>> {
+	fun getCharacterWeapons(characterId: Int): Flow<List<WeaponWithItem>> {
 		return characterDao.getCharacterWeapons(characterId)
 	}
 
@@ -144,5 +145,12 @@ class CharacterViewModel(application: Application) : ViewModel() {
 
 	fun getCharacterSpellSlots(characterId: Int): Flow<List<CharacterSpellSlot>> {
 		return characterDao.getCharacterSpellSlots(characterId)
+	}
+
+	fun updateSpellSlot(characterId: Int, slot: CharacterSpellSlot, newUsedCount: Int) {
+		viewModelScope.launch {
+			val updatedSlot = slot.copy(usedSlots = newUsedCount)
+			characterDao.updateCharacterSpellSlot(updatedSlot)
+		}
 	}
 }

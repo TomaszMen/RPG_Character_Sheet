@@ -90,7 +90,7 @@ fun CharacterActionsScreen(viewModel: CharacterViewModel, navController: NavHost
 			Text(
 				text = "Attacks",
 				style = MaterialTheme.typography.headlineSmall.copy(
-					color = Color.Red,
+					color = Color.Black,
 					fontWeight = FontWeight.Bold
 				),
 				modifier = Modifier.padding(vertical = 8.dp)
@@ -110,7 +110,7 @@ fun CharacterActionsScreen(viewModel: CharacterViewModel, navController: NavHost
 			Text(
 				text = "Spells",
 				style = MaterialTheme.typography.headlineSmall.copy(
-					color = Color.Blue,
+					color = Color.Black,
 					fontWeight = FontWeight.Bold
 				),
 				modifier = Modifier.padding(vertical = 8.dp)
@@ -138,7 +138,7 @@ fun CharacterActionsScreen(viewModel: CharacterViewModel, navController: NavHost
 			Text(
 				text = "Features & Abilities",
 				style = MaterialTheme.typography.headlineSmall.copy(
-					color = Color.Green,
+					color = Color.Black,
 					fontWeight = FontWeight.Bold
 				),
 				modifier = Modifier.padding(vertical = 8.dp)
@@ -156,14 +156,14 @@ fun CharacterActionsScreen(viewModel: CharacterViewModel, navController: NavHost
 }
 
 @Composable
-fun WeaponAttackCard(WeaponAndItem: WeaponAndItem) {
+fun WeaponAttackCard(WeaponAndItem: WeaponWithItem) {
 	val weapon = WeaponAndItem.weapon
-	val item = WeaponAndItem.item
+	val itemName = WeaponAndItem.itemName
 	Card(
 		modifier = Modifier
 			.fillMaxWidth()
 			.padding(vertical = 4.dp),
-		colors = CardDefaults.cardColors(containerColor = Color(0x22FF0000))
+		colors = CardDefaults.cardColors(containerColor = Color.White)
 	) {
 		Column(modifier = Modifier.padding(12.dp)) {
 			Row(
@@ -171,7 +171,7 @@ fun WeaponAttackCard(WeaponAndItem: WeaponAndItem) {
 				horizontalArrangement = Arrangement.SpaceBetween
 			) {
 				Text(
-					text = item.itemName,
+					text = itemName,
 					style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
 				)
 				Text(
@@ -204,28 +204,38 @@ fun SpellSlotsTracker(spellSlots: List<CharacterSpellSlot>) {
 		modifier = Modifier
 			.fillMaxWidth()
 			.padding(vertical = 8.dp),
-		colors = CardDefaults.cardColors(containerColor = Color(0x220000FF))
+		colors = CardDefaults.cardColors(containerColor = Color.White)
 	) {
 		Column(modifier = Modifier.padding(12.dp)) {
 			Text(
 				text = "Spell Slots",
-				style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+				style = MaterialTheme.typography.titleMedium,
+				color = Color(0xFF424242)
 			)
 
-			Row(
-				modifier = Modifier.fillMaxWidth(),
-				horizontalArrangement = Arrangement.SpaceEvenly
-			) {
-				spellSlots.sortedBy { it.spellLevel }.forEach { slot ->
-					Column(horizontalAlignment = Alignment.CenterHorizontally) {
-						Text(
-							text = "Level ${slot.spellLevel}",
-							style = MaterialTheme.typography.labelSmall
+			spellSlots.sortedBy { it.spellLevel }.forEach { slot ->
+				Row(
+					modifier = Modifier
+						.fillMaxWidth()
+						.padding(vertical = 4.dp),
+					verticalAlignment = Alignment.CenterVertically
+				) {
+					Text(
+						text = "Level ${slot.spellLevel}:",
+						modifier = Modifier.weight(1f),
+						color = Color(0xFF616161)
+					)
+
+					repeat(slot.totalSlots) { index ->
+						Checkbox(
+							checked = index < slot.usedSlots,
+							onCheckedChange = { /* Handle slot usage */ },
+							colors = CheckboxDefaults.colors(
+								checkedColor = Color(0xFF757575),
+								uncheckedColor = Color(0xFFBDBDBD)
+							)
 						)
-						Text(
-							text = "${slot.usedSlots}/${slot.totalSlots}",
-							style = MaterialTheme.typography.titleMedium
-						)
+						Spacer(modifier = Modifier.width(4.dp))
 					}
 				}
 			}
@@ -241,7 +251,7 @@ fun SpellsLevelSection(level: Int, spells: List<Spell>) {
 		modifier = Modifier
 			.fillMaxWidth()
 			.padding(vertical = 4.dp),
-		colors = CardDefaults.cardColors(containerColor = Color(0x220000FF))
+		colors = CardDefaults.cardColors(containerColor = Color.White)
 	) {
 		Column(modifier = Modifier.padding(8.dp)) {
 			Row(
@@ -349,7 +359,7 @@ fun FeatureCard(feature: Feature) {
 		modifier = Modifier
 			.fillMaxWidth()
 			.padding(vertical = 4.dp),
-		colors = CardDefaults.cardColors(containerColor = Color(0x2200FF00))
+		colors = CardDefaults.cardColors(containerColor = Color.White)
 	) {
 		Column(modifier = Modifier.padding(12.dp)) {
 			Text(
