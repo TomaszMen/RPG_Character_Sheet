@@ -10,23 +10,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.example.rpg_character_sheet.ui.theme.CharacterSheetTheme
 
-// Imports that are only used by the old UI
-import android.content.Intent
-import android.content.pm.ActivityInfo
-import android.content.res.Resources.Theme
-import android.util.Log
-import android.widget.Toast
-import androidx.activity.viewModels
-import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import androidx.recyclerview.widget.RecyclerView
-
 
 class MainActivity : AppCompatActivity() {
-//    private val viewModel: CharacterViewModel by viewModels {
-//        ViewModelProvider.AndroidViewModelFactory.getInstance(application)
-//    }
 
     // New Compose-powered UI
     override fun onCreate(savedInstanceState: Bundle?) {

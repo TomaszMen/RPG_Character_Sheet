@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CharacterDao {
+    // Character queries
     @Insert
     suspend fun insert(character: Character)
 
@@ -50,6 +51,14 @@ interface CharacterDao {
     @Query("SELECT * FROM characters ORDER BY characterName ASC")
     fun getAllCharacters(): Flow<List<Character>>
 
-    @Query("SELECT * FROM characters WHERE characterId = :id")
-    fun getCharacterById(id: Int): Flow<Character?>
+    @Query("SELECT * FROM characters WHERE characterId = :characterId")
+    fun getCharacterById(characterId: Int): Flow<Character?>
+
+    // Class queries
+    @Query("SELECT * FROM classes WHERE classId = :classId")
+    fun getClassById(classId: Int): Flow<CharacterClass?>
+
+    // Race queries
+    @Query("SELECT * FROM races WHERE raceId = :raceId")
+    fun getRaceById(raceId: Int): Flow<Race?>
 }

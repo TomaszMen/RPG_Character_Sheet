@@ -1,5 +1,6 @@
 package com.example.rpg_character_sheet
 
+// Tables
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -7,11 +8,8 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-
-// Tables
-import table_entities.Character
+import table_entities.*
 
 
 // Creates the CharacterViewModel instance inside UI elements so it doesn't need to passed as an argument
@@ -48,17 +46,16 @@ class CharacterViewModel(application: Application) : ViewModel() {
 		}
 	}
 
-	fun selectCharacter(id: Int) {
-		_selectedCharacterId.value = id
+	fun selectCharacter(characterId: Int) {
+		_selectedCharacterId.value = characterId
 	}
 
 	fun getSelectedCharacter() : Flow<Character?> {
-		//return combine(_characters, _selectedCharacterId) { list, id -> list[id] }
 		return characterDao.getCharacterById(_selectedCharacterId.value)
 	}
 
-	fun getCharacterById(id: Int): Flow<Character?> {
-		return characterDao.getCharacterById(id)
+	fun getCharacterById(characterId: Int): Flow<Character?> {
+		return characterDao.getCharacterById(characterId)
 	}
 
 	fun insertCharacter(character: Character) {
@@ -77,5 +74,15 @@ class CharacterViewModel(application: Application) : ViewModel() {
 		viewModelScope.launch {
 			characterDao.delete(character)
 		}
+	}
+
+	// Classes
+	fun getClassById(classId: Int): Flow<CharacterClass?> {
+		return characterDao.getClassById(classId)
+	}
+
+	// Races
+	fun getRaceById(raceId: Int): Flow<Race?> {
+		return characterDao.getRaceById(raceId)
 	}
 }
