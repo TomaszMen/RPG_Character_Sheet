@@ -35,6 +35,7 @@ fun CharacterDetailsScreen(characterId: Int, viewModel: CharacterViewModel, navC
 
 	if (character != null) {
 
+		val tempNameState = remember { mutableStateOf(character.characterName) }
 		val tempStrState = remember { mutableStateOf(character.strength.toString()) }
 		val tempDexState = remember { mutableStateOf(character.dexterity.toString()) }
 		val tempConState = remember { mutableStateOf(character.constitution.toString()) }
@@ -42,7 +43,6 @@ fun CharacterDetailsScreen(characterId: Int, viewModel: CharacterViewModel, navC
 		val tempWisState = remember { mutableStateOf(character.wisdom.toString()) }
 		val tempChaState = remember { mutableStateOf(character.charisma.toString()) }
 		val tempLevelState = remember { mutableStateOf(character.level.toString()) }
-		val tempNameState = remember { mutableStateOf(character.characterName) }
 
 		Scaffold(
 			floatingActionButton = {
