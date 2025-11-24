@@ -67,6 +67,12 @@ interface CharacterDao {
     @Query("SELECT * FROM classes")
     fun getAllClasses(): Flow<List<CharacterClass>>
 
+    @Query("SELECT * FROM backgrounds")
+    fun getAllBackgrounds(): Flow<List<Background>>
+
+    @Query("SELECT * FROM alignments")
+    fun getAllAlignments(): Flow<List<Alignment>>
+
     @Query("UPDATE characters SET classId = :classId WHERE characterId = :characterId")
     suspend fun updateCharacterClass(characterId: Int, classId: Int)
 
@@ -161,6 +167,44 @@ interface CharacterDao {
 
     @Query("SELECT * FROM character_spell_slots WHERE characterId = :characterId")
     fun getCharacterSpellSlots(characterId: Int): Flow<List<CharacterSpellSlot>>
+
+    // Dodaj te query do CharacterDao.kt
+
+    @Query("SELECT * FROM features WHERE sourceType = 'Race' AND sourceId = :raceId")
+    fun getRaceFeatures(raceId: Int): Flow<List<Feature>>
+
+    @Query("SELECT * FROM features WHERE sourceType = 'Subrace' AND sourceId = :subraceId")
+    fun getSubraceFeatures(subraceId: Int): Flow<List<Feature>>
+
+    @Query("SELECT * FROM features WHERE sourceType = 'Class' AND sourceId = :classId AND levelRequirement = 1")
+    fun getClassFeatures(classId: Int): Flow<List<Feature>>
+
+    @Query("SELECT * FROM skills")
+    fun getAllSkills(): Flow<List<Skill>>
+
+    @Query("SELECT * FROM class_spells WHERE classId = :classId")
+    fun getClassSpells(classId: Int): Flow<List<ClassSpell>>
+
+    @Query("SELECT * FROM spells WHERE spellId IN (:spellIds)")
+    fun getSpellsByIds(spellIds: List<Int>): Flow<List<Spell>>
+
+    @Insert
+    suspend fun insertCharacterSkill(characterSkill: CharacterSkill)
+
+    @Insert
+    suspend fun insertCharacterLanguage(characterLanguage: CharacterLanguage)
+
+    @Insert
+    suspend fun insertCharacterSpell(characterSpell: CharacterSpell)
+
+    @Insert
+    suspend fun insertAndGetId(character: Character): Long
+
+    @Query("SELECT * FROM items WHERE itemType = 'Gear' OR itemType = 'Tool'")
+    fun getStarterEquipment(): Flow<List<Item>>
+
+    @Query("SELECT hitDie FROM classes WHERE classId = :classId")
+    fun getClassHitDie(classId: Int): Flow<Int>
 }
 data class WeaponAndItem(
     @Embedded val weapon: Weapon,

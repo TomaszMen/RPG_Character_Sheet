@@ -58,7 +58,7 @@ import table_entities.ClassSpell
     Race::class,
     Language::class,
     ClassSpell::class
-                     ], version = 3, exportSchema = false)
+                     ], version = 1, exportSchema = true)
 
 abstract class CharacterDatabase : RoomDatabase() {
     abstract fun characterDao(): CharacterDao
@@ -67,7 +67,7 @@ abstract class CharacterDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: CharacterDatabase? = null
 
-        private val MIGRATION_2_3 = object : Migration(2, 3) {
+        private val MIGRATION = object : Migration(1, 2) {
             override fun migrate(db: SupportSQLiteDatabase) {
             }
         }
@@ -79,8 +79,15 @@ abstract class CharacterDatabase : RoomDatabase() {
                     CharacterDatabase::class.java,
                     "character_database"
                 )   .fallbackToDestructiveMigration()
-                    .addMigrations(MIGRATION_2_3)
-                    //.createFromAsset("project_database.db")
+                    //.addMigrations(MIGRATION)
+                    .createFromAsset("project_database.db")
+                    //.addCallback(object : RoomDatabase.Callback() {
+                    //    override fun onOpen(db: SupportSQLiteDatabase) {
+                    //        super.onOpen(db)
+                    //        // Tymczasowo wyłącz foreign key constraints
+                    //        db.execSQL("PRAGMA foreign_keys=OFF;")
+                    //    }
+                    //})
                     .build()
                 INSTANCE = instance
                 instance

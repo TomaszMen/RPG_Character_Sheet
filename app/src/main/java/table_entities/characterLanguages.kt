@@ -28,6 +28,6 @@ import androidx.room.PrimaryKey
 data class CharacterLanguage(
     @PrimaryKey(autoGenerate = true)
     val characterLanguageId: Int = 0,
-    val characterId: Int,
+    val characterId: Long,
     val languageId: Int
 )

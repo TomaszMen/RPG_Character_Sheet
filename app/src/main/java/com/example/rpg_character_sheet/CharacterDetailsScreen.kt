@@ -106,15 +106,15 @@ fun CharacterDetailsScreen(characterId: Int, viewModel: CharacterViewModel, navC
 				}
 
 				// Subrace
-				val characterSubrace by viewModel.getSubraceByIdAsPair(character.subraceId)
-					.collectAsState(initial = null)
-				val subraces by viewModel.getSubracesOfRaceAsPairs(character.raceId)
-					.collectAsState(initial = null)
-				if (subraces != null && characterSubrace != null) {
-					Spinner(subraces, characterSubrace, "Subrace") {
-						viewModel.updateCharacterSubrace(character, it.first)
-					}
-				}
+				//val characterSubrace by viewModel.getSubraceByIdAsPair(character.subraceId)
+				//	.collectAsState(initial = null)
+				//val subraces by viewModel.getSubracesOfRaceAsPairs(character.raceId)
+				//	.collectAsState(initial = null)
+				//if (subraces != null && characterSubrace != null) {
+				//	Spinner(subraces, characterSubrace, "Subrace") {
+				//		viewModel.updateCharacterSubrace(character, it.first)
+				//	}
+				//}
 
 				// Class
 				val characterClass by viewModel.getClassByIdAsPair(character.classId)
@@ -127,16 +127,16 @@ fun CharacterDetailsScreen(characterId: Int, viewModel: CharacterViewModel, navC
 					}
 				}
 
-				// Subclass
-				val characterSubclass by viewModel.getSubclassByIdAsPair(character.subclassId)
-					.collectAsState(initial = null)
-				val subclasses by viewModel.getSubclassesOfClassAsPairs(character.classId)
-					.collectAsState(initial = null)
-				if (characterSubclass != null && subclasses != null) {
-					Spinner(subclasses, characterSubclass, "Class") {
-						viewModel.updateCharacterSubclass(character, it.first)
-					}
-				}
+				//// Subclass
+				//val characterSubclass by viewModel.getSubclassByIdAsPair(character.subclassId)
+				//	.collectAsState(initial = null)
+				//val subclasses by viewModel.getSubclassesOfClassAsPairs(character.classId)
+				//	.collectAsState(initial = null)
+				//if (characterSubclass != null && subclasses != null) {
+				//	Spinner(subclasses, characterSubclass, "Class") {
+				//		viewModel.updateCharacterSubclass(character, it.first)
+				//	}
+				//}
 
 				// Stats
 

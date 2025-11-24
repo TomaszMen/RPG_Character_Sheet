@@ -15,10 +15,11 @@ import table_entities.*
 
 
 // Creates the CharacterViewModel instance inside UI elements so it doesn't need to passed as an argument
+// Creates the CharacterViewModel instance inside UI elements so it doesn't need to passed as an argument
 class CharacterViewModelFactory(private val application: Application) : ViewModelProvider.Factory {
-	override fun <T : ViewModel> create(modelClass: Class<T>): T {
-		return CharacterViewModel(application) as T
-	}
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return CharacterViewModel(application) as T
+    }
 }
 
 class CharacterViewModel(application: Application) : ViewModel() {
@@ -104,6 +105,18 @@ class CharacterViewModel(application: Application) : ViewModel() {
 			characterClass.map { it.classId to it.className }
 		}
 	}
+
+    fun getAllBackgroundsAsPairs(): Flow<List<Pair<Int, String>>> {
+        return characterDao.getAllBackgrounds().map { characterBackground ->
+            characterBackground.map { it.backgroundId to it.backgroundName }
+        }
+    }
+
+    fun getAllAlignmentsAsPairs(): Flow<List<Pair<Int, String>>> {
+        return characterDao.getAllAlignments().map { characterAlignment ->
+            characterAlignment.map { it.alignmentId to it.alignmentName }
+        }
+    }
 
 	fun updateCharacterClass(character: Character, newClassId: Int) {
 		viewModelScope.launch {
@@ -217,6 +230,12 @@ class CharacterViewModel(application: Application) : ViewModel() {
 		return characterDao.getSubraceById(subraceId)
 	}
 
+    fun getSubracesForRace(raceId: Int): Flow<List<Pair<Int, String>>> {
+        return characterDao.getSubracesOfRace(raceId).map { subraces ->
+            subraces.map { it.subraceId to it.subraceName }
+        }
+    }
+
 	fun getAllSubraces(): Flow<List<Subrace>> {
 		return characterDao.getAllSubraces()
 	}
@@ -243,4 +262,119 @@ class CharacterViewModel(application: Application) : ViewModel() {
 			characterDao.updateCharacterStats(characterId, str, dex, con, int, wis, cha)
 		}
 	}
+
+    // Features
+    fun getRaceFeatures(raceId: Int): Flow<List<Feature>> {
+        return characterDao.getRaceFeatures(raceId)
+    }
+
+    fun getSubraceFeatures(subraceId: Int): Flow<List<Feature>> {
+        return characterDao.getSubraceFeatures(subraceId)
+    }
+
+    fun getClassFeatures(classId: Int): Flow<List<Feature>> {
+        return characterDao.getClassFeatures(classId)
+    }
+
+    // Skills
+    fun getAllSkills(): Flow<List<Skill>> {
+        return characterDao.getAllSkills()
+    }
+
+    // Character Creation
+    fun createNewCharacter(characterData: CharacterCreationData) {
+        viewModelScope.launch {
+            // Create base character
+            val character = Character(
+                characterName = characterData.name,
+                raceId = characterData.raceId,
+                subraceId = characterData.subraceId,
+                classId = characterData.classId,
+                subclassId = 0,
+                backgroundId = characterData.backgroundId,
+                alignmentId = characterData.alignmentId,
+                level = 1,
+                strength = characterData.strength,
+                dexterity = characterData.dexterity,
+                constitution = characterData.constitution,
+                intelligence = characterData.intelligence,
+                wisdom = characterData.wisdom,
+                charisma = characterData.charisma,
+                hitPointMax = characterData.maxHP,
+                currentHitPoints = characterData.maxHP,
+                armorClass = 10 + characterData.dexterity.modifier(),
+                speed = characterData.speed
+            )
+
+            val characterId = characterDao.insertAndGetId(character)
+
+            // Add skills
+            characterData.skillProficiencies.forEach { skillId ->
+                characterDao.insertCharacterSkill(
+                    CharacterSkill(
+                        characterId = characterId,
+                        skillId = skillId,
+                        proficiency = 1
+                    )
+                )
+            }
+
+            // Add languages
+            characterData.languages.forEach { languageId ->
+                characterDao.insertCharacterLanguage(
+                    CharacterLanguage(
+                        characterId = characterId,
+                        languageId = languageId
+                    )
+                )
+            }
+
+            // Add equipment
+            characterData.equipment.forEach { itemId ->
+                characterDao.insertCharacterInventory(
+                    CharacterInventory(
+                        characterId = characterId,
+                        itemId = itemId,
+                        quantity = 1,
+                        equipped = false
+                    )
+                )
+            }
+
+            // Add spells if any
+            characterData.spells.forEach { spellId ->
+                characterDao.insertCharacterSpell(
+                    CharacterSpell(
+                        characterId = characterId,
+                        spellId = spellId,
+                        prepared = true
+                    )
+                )
+            }
+        }
+    }
+
+    data class CharacterCreationData(
+        val name: String = "",
+        val raceId: Int = 0,
+        val subraceId: Int = 0,
+        val classId: Int = 0,
+        val backgroundId: Int = 0,
+        val alignmentId: Int = 0,
+        val strength: Int = 10,
+        val dexterity: Int = 10,
+        val constitution: Int = 10,
+        val intelligence: Int = 10,
+        val wisdom: Int = 10,
+        val charisma: Int = 10,
+        val skillProficiencies: List<Int> = emptyList(),
+        val languages: List<Int> = emptyList(),
+        val equipment: List<Int> = emptyList(),
+        val spells: List<Int> = emptyList(),
+        val maxHP: Int = 0,
+        val speed: Int = 30
+    )
+
+    // Extension function to calculate modifier
+    fun Int.modifier(): Int = (this - 10) / 2
 }

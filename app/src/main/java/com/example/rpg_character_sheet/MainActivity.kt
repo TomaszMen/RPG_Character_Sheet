@@ -1,13 +1,17 @@
 package com.example.rpg_character_sheet
 
+import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
 import com.example.rpg_character_sheet.ui.theme.CharacterSheetTheme
 
 
@@ -27,6 +31,11 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    @Composable
+    fun addButtonClick(navController: NavHostController) {
+        navController.navigate(Screens.CharacterAddScreen.route)
     }
 
     // Old xml-based UI

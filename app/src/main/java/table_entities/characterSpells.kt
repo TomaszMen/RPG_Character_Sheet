@@ -28,7 +28,7 @@ import androidx.room.PrimaryKey
 data class CharacterSpell(
     @PrimaryKey(autoGenerate = true)
     val characterSpellId: Int = 0,
-    val characterId: Int,
+    val characterId: Long,
     val spellId: Int,
     val prepared: Boolean = false
 )

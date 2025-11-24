@@ -60,7 +60,7 @@ data class Character(
     val backgroundId: Int,
     val alignmentId: Int,
     val level: Int = 1,
-    val inspiration: Boolean = false,
+    val inspiration: Int = 0,
     val strength: Int = 10,
     val dexterity: Int = 10,
     val constitution: Int = 10,

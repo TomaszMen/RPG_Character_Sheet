@@ -28,8 +28,8 @@ import androidx.room.PrimaryKey
 data class CharacterSkill(
     @PrimaryKey(autoGenerate = true)
     val characterSkillId: Int = 0,
-    val characterId: Int,
+    val characterId: Long,
     val skillId: Int,
-    val proficiency: Boolean = false,
+    val proficiency: Int = false,
     val expertise: Boolean = false
 )

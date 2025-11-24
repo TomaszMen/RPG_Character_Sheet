@@ -70,7 +70,7 @@ dependencies {
 
     // Common
     implementation(libs.androidx.room.runtime)
-    annotationProcessor(libs.androidx.room.room.compiler)
+    //annotationProcessor(libs.androidx.room.room.compiler)
     kapt(libs.androidx.room.room.compiler)
     implementation(libs.androidx.core.ktx)
     implementation(libs.material)
