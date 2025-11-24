@@ -80,14 +80,14 @@ abstract class CharacterDatabase : RoomDatabase() {
                     "character_database"
                 )   .fallbackToDestructiveMigration()
                     //.addMigrations(MIGRATION)
-                    .createFromAsset("project_database.db")
-                    //.addCallback(object : RoomDatabase.Callback() {
-                    //    override fun onOpen(db: SupportSQLiteDatabase) {
-                    //        super.onOpen(db)
-                    //        // Tymczasowo wyłącz foreign key constraints
-                    //        db.execSQL("PRAGMA foreign_keys=OFF;")
-                    //    }
-                    //})
+                    //.createFromAsset("project_database.db")
+                    .addCallback(object : RoomDatabase.Callback() {
+                        override fun onOpen(db: SupportSQLiteDatabase) {
+                            super.onOpen(db)
+                            // Tymczasowo wyłącz foreign key constraints
+                            db.execSQL("PRAGMA foreign_keys=OFF;")
+                        }
+                    })
                     .build()
                 INSTANCE = instance
                 instance

@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -48,6 +49,107 @@ class CharacterViewModel(application: Application) : ViewModel() {
 			}
 		}
 	}
+
+    data class StartingEquipmentOption(
+        val name: String,
+        val items: List<Int> // itemIds
+    )
+
+    data class RaceBonus(
+        val strength: Int = 0,
+        val dexterity: Int = 0,
+        val constitution: Int = 0,
+        val intelligence: Int = 0,
+        val wisdom: Int = 0,
+        val charisma: Int = 0,
+        val extraHP: Int = 0
+    )
+
+    // Extension function for modifier calculation
+    private fun Int.modifier(): Int = (this - 10) / 2
+
+    private fun calculateStartingHP(hitDie: Int, constitution: Int): Int {
+        val conModifier = constitution.modifier()
+        return hitDie + conModifier
+    }
+
+    fun calculateRaceBonuses(raceId: Int, subraceId: Int): RaceBonus {
+        return when (raceId) {
+            // Dwarf
+            1 -> when (subraceId) {
+                // Hill Dwarf
+                1 -> RaceBonus(wisdom = 1, extraHP = 1)
+                // Mountain Dwarf
+                2 -> RaceBonus(strength = 2)
+                else -> RaceBonus(constitution = 2)
+            }
+            // Elf
+            2 -> when (subraceId) {
+                // High Elf
+                3 -> RaceBonus(dexterity = 2, intelligence = 1)
+                // Wood Elf
+                4 -> RaceBonus(dexterity = 2, wisdom = 1)
+                // Drow
+                5 -> RaceBonus(dexterity = 2, charisma = 1)
+                else -> RaceBonus(dexterity = 2)
+            }
+            // Halfling
+            3 -> RaceBonus(dexterity = 2)
+            // Human
+            4 -> RaceBonus(strength = 1, dexterity = 1, constitution = 1,
+                intelligence = 1, wisdom = 1, charisma = 1)
+            // Dragonborn
+            5 -> RaceBonus(strength = 2, charisma = 1)
+            // Gnome
+            6 -> RaceBonus(intelligence = 2)
+            // Half-Elf
+            7 -> RaceBonus(charisma = 2)
+            // Half-Orc
+            8 -> RaceBonus(strength = 2, constitution = 1)
+            // Tiefling
+            9 -> RaceBonus(intelligence = 1, charisma = 2)
+            else -> RaceBonus()
+        }
+    }
+
+    fun getMaxSkillProficiencies(classId: Int): Int {
+        return when (classId) {
+            2 -> 3 // Bard
+            9 -> 4 // Rogue
+            else -> 2 // Most classes
+        }
+    }
+
+    fun getStartingEquipmentOptions(classId: Int): List<StartingEquipmentOption> {
+        return when (classId) {
+            // Barbarian
+            1 -> listOf(
+                StartingEquipmentOption("Standard Equipment", listOf(16, 17, 4)),
+                StartingEquipmentOption("100 GP", listOf())
+            )
+            // Fighter
+            5 -> listOf(
+                StartingEquipmentOption("Standard Equipment - Chain Mail", listOf(32, 10, 13)),
+                StartingEquipmentOption("Standard Equipment - Leather", listOf(48, 2, 28)),
+                StartingEquipmentOption("100 GP", listOf())
+            )
+            // Rogue
+            9 -> listOf(
+                StartingEquipmentOption("Standard Equipment", listOf(41, 15, 2, 26)),
+                StartingEquipmentOption("100 GP", listOf())
+            )
+            // Wizard
+            12 -> listOf(
+                StartingEquipmentOption("Standard Equipment", listOf(21, 15)),
+                StartingEquipmentOption("100 GP", listOf())
+            )
+            // Default for other classes
+            else -> listOf(
+                StartingEquipmentOption("Standard Equipment", listOf()),
+                StartingEquipmentOption("100 GP", listOf())
+            )
+        }
+    }
 
 	fun selectCharacter(characterId: Int) {
 		_selectedCharacterId.value = characterId
@@ -123,6 +225,34 @@ class CharacterViewModel(application: Application) : ViewModel() {
 			characterDao.updateCharacterClass(character.characterId, newClassId)
 		}
 	}
+
+    // Background queries
+    fun getBackgroundById(backgroundId: Int): Flow<Background> {
+        return characterDao.getBackgroundById(backgroundId)
+    }
+
+    // Subrace queries
+    fun getSubraceById(subraceId: Int): Flow<Subrace> {
+        return characterDao.getSubraceById(subraceId)
+    }
+
+    // Features queries
+    fun getRaceFeatures(raceId: Int): Flow<List<Feature>> {
+        return characterDao.getRaceFeatures(raceId)
+    }
+
+    fun getSubraceFeatures(subraceId: Int): Flow<List<Feature>> {
+        return characterDao.getSubraceFeatures(subraceId)
+    }
+
+    fun getClassFeatures(classId: Int): Flow<List<Feature>> {
+        return characterDao.getClassFeatures(classId)
+    }
+
+    // Skills query
+    fun getAllSkills(): Flow<List<Skill>> {
+        return characterDao.getAllSkills()
+    }
 
 	// Subclasses
 	fun getSubclassByIdAsPair(subclassId: Int): Flow<Pair<Int, String>> {
@@ -225,11 +355,6 @@ class CharacterViewModel(application: Application) : ViewModel() {
 		}
 	}
 
-	// Subraces
-	fun getSubraceById(subraceId: Int): Flow<Subrace> {
-		return characterDao.getSubraceById(subraceId)
-	}
-
     fun getSubracesForRace(raceId: Int): Flow<List<Pair<Int, String>>> {
         return characterDao.getSubracesOfRace(raceId).map { subraces ->
             subraces.map { it.subraceId to it.subraceName }
@@ -256,6 +381,55 @@ class CharacterViewModel(application: Application) : ViewModel() {
 		}
 	}
 
+    fun getMaxSkillProficiencies(classId: Int, backgroundId: Int): Int {
+        // Base class skills
+        val classSkills = when (classId) {
+            2 -> 3 // Bard
+            9 -> 4 // Rogue
+            else -> 2 // Most classes
+        }
+
+        // Background typically gives 2 skills
+        val backgroundSkills = 2
+
+        return classSkills
+    }
+
+    suspend fun getAvailableClassSkills(classId: Int): List<Skill> {
+        return when (classId) {
+            // Barbarian
+            1 -> getSkillsByAbilities(listOf("STR", "DEX", "CON", "WIS"))
+            // Bard - can choose any 3
+            2 -> characterDao.getAllSkills().first()
+            // Cleric
+            3 -> getSkillsByAbilities(listOf("WIS", "CHA"))
+            // Druid
+            4 -> getSkillsByAbilities(listOf("INT", "WIS"))
+            // Fighter
+            5 -> getSkillsByAbilities(listOf("STR", "DEX", "CON"))
+            // Monk
+            6 -> getSkillsByAbilities(listOf("STR", "DEX", "WIS"))
+            // Paladin
+            7 -> getSkillsByAbilities(listOf("WIS", "CHA"))
+            // Ranger
+            8 -> getSkillsByAbilities(listOf("STR", "DEX", "WIS"))
+            // Rogue
+            9 -> getSkillsByAbilities(listOf("DEX", "INT", "CHA"))
+            // Sorcerer
+            10 -> getSkillsByAbilities(listOf("CHA"))
+            // Warlock
+            11 -> getSkillsByAbilities(listOf("WIS", "CHA"))
+            // Wizard
+            12 -> getSkillsByAbilities(listOf("INT"))
+            else -> characterDao.getAllSkills().first()
+        }
+    }
+
+    private suspend fun getSkillsByAbilities(abilities: List<String>): List<Skill> {
+        val allSkills = characterDao.getAllSkills().first()
+        return allSkills.filter { it.abilityScore.toString() in abilities }
+    }
+
 	// Stats
 	fun updateCharacterStats(characterId: Int, str: Int, dex: Int, con: Int, int: Int, wis: Int, cha: Int) {
 		viewModelScope.launch {
@@ -263,26 +437,7 @@ class CharacterViewModel(application: Application) : ViewModel() {
 		}
 	}
 
-    // Features
-    fun getRaceFeatures(raceId: Int): Flow<List<Feature>> {
-        return characterDao.getRaceFeatures(raceId)
-    }
-
-    fun getSubraceFeatures(subraceId: Int): Flow<List<Feature>> {
-        return characterDao.getSubraceFeatures(subraceId)
-    }
-
-    fun getClassFeatures(classId: Int): Flow<List<Feature>> {
-        return characterDao.getClassFeatures(classId)
-    }
-
-    // Skills
-    fun getAllSkills(): Flow<List<Skill>> {
-        return characterDao.getAllSkills()
-    }
-
-    // Character Creation
-    fun createNewCharacter(characterData: CharacterCreationData) {
+    fun createNewCharacterSimple(characterData: CharacterCreationDataSimple) {
         viewModelScope.launch {
             // Create base character
             val character = Character(
@@ -300,15 +455,15 @@ class CharacterViewModel(application: Application) : ViewModel() {
                 intelligence = characterData.intelligence,
                 wisdom = characterData.wisdom,
                 charisma = characterData.charisma,
-                hitPointMax = characterData.maxHP,
-                currentHitPoints = characterData.maxHP,
+                hitPointMax = calculateStartingHP(characterData.classId, characterData.constitution),
+                currentHitPoints = calculateStartingHP(characterData.classId, characterData.constitution),
                 armorClass = 10 + characterData.dexterity.modifier(),
-                speed = characterData.speed
+                speed = 30 // default speed
             )
 
-            val characterId = characterDao.insertAndGetId(character)
+            val characterId = characterDao.insertAndGetId(character).toInt()
 
-            // Add skills
+            // Add skills if any
             characterData.skillProficiencies.forEach { skillId ->
                 characterDao.insertCharacterSkill(
                     CharacterSkill(
@@ -319,17 +474,7 @@ class CharacterViewModel(application: Application) : ViewModel() {
                 )
             }
 
-            // Add languages
-            characterData.languages.forEach { languageId ->
-                characterDao.insertCharacterLanguage(
-                    CharacterLanguage(
-                        characterId = characterId,
-                        languageId = languageId
-                    )
-                )
-            }
-
-            // Add equipment
+            // Add equipment if any
             characterData.equipment.forEach { itemId ->
                 characterDao.insertCharacterInventory(
                     CharacterInventory(
@@ -340,21 +485,11 @@ class CharacterViewModel(application: Application) : ViewModel() {
                     )
                 )
             }
-
-            // Add spells if any
-            characterData.spells.forEach { spellId ->
-                characterDao.insertCharacterSpell(
-                    CharacterSpell(
-                        characterId = characterId,
-                        spellId = spellId,
-                        prepared = true
-                    )
-                )
-            }
         }
     }
 
-    data class CharacterCreationData(
+    // Simple data class without complex features
+    data class CharacterCreationDataSimple(
         val name: String = "",
         val raceId: Int = 0,
         val subraceId: Int = 0,
@@ -368,13 +503,6 @@ class CharacterViewModel(application: Application) : ViewModel() {
         val wisdom: Int = 10,
         val charisma: Int = 10,
         val skillProficiencies: List<Int> = emptyList(),
-        val languages: List<Int> = emptyList(),
-        val equipment: List<Int> = emptyList(),
-        val spells: List<Int> = emptyList(),
-        val maxHP: Int = 0,
-        val speed: Int = 30
+        val equipment: List<Int> = emptyList()
     )
-
-    // Extension function to calculate modifier
-    fun Int.modifier(): Int = (this - 10) / 2
 }

@@ -203,8 +203,6 @@ interface CharacterDao {
     @Query("SELECT * FROM items WHERE itemType = 'Gear' OR itemType = 'Tool'")
     fun getStarterEquipment(): Flow<List<Item>>
 
-    @Query("SELECT hitDie FROM classes WHERE classId = :classId")
-    fun getClassHitDie(classId: Int): Flow<Int>
 }
 data class WeaponAndItem(
     @Embedded val weapon: Weapon,
