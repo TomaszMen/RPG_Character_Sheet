@@ -1,5 +1,3 @@
-// ZASTĄP cały plik CharacterAddScreen.kt tym:
-
 package com.example.rpg_character_sheet
 
 import androidx.compose.foundation.background
