@@ -1,5 +1,6 @@
 package table_entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -20,16 +21,22 @@ import androidx.room.PrimaryKey
             childColumns = ["skillId"],
             onDelete = ForeignKey.CASCADE
         )
-    ],
-    indices = [
-        Index(value = ["characterId", "skillId"], unique = true)
     ]
 )
 data class CharacterSkill(
     @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "characterSkillId")
     val characterSkillId: Int = 0,
+
+    @ColumnInfo(name = "characterId")
     val characterId: Int,
+
+    @ColumnInfo(name = "skillId")
     val skillId: Int,
-    val proficiency: Boolean = false,
-    val expertise: Boolean = false
+
+    @ColumnInfo(name = "proficiency")
+    val proficiency: Int = 0,
+
+    @ColumnInfo(name = "expertise")
+    val expertise: Int = 0
 )

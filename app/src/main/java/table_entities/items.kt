@@ -14,7 +14,7 @@ data class Item(
     val itemId: Int = 0,
     val itemName: String,
     val itemType: ItemType,
-    val weight: Float = 0f,
+    val weight: Int = 0,
     val cost: Int = 0,
     val description: String? = null
 ) {

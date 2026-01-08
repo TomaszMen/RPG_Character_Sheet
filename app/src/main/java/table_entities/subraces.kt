@@ -22,7 +22,7 @@ import androidx.room.PrimaryKey
 data class Subrace(
     @PrimaryKey(autoGenerate = true)
     val subraceId: Int = 0,
-    val raceId: Int,
+    val raceId: Int? = null,
     val subraceName: String,
     val description: String? = null
 )

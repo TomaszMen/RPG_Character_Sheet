@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.rpg_character_sheet"
-        minSdk = 26
+        minSdk = 29
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -51,6 +51,8 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.ui.android)
+    implementation(libs.androidx.compose.remote.creation.compose)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
@@ -69,7 +71,7 @@ dependencies {
 
     // Common
     implementation(libs.androidx.room.runtime)
-    annotationProcessor(libs.androidx.room.room.compiler)
+    //annotationProcessor(libs.androidx.room.room.compiler)
     kapt(libs.androidx.room.room.compiler)
     implementation(libs.androidx.core.ktx)
     implementation(libs.material)
