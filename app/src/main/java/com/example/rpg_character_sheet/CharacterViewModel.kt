@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import table_entities.*
@@ -393,6 +395,181 @@ class CharacterViewModel(application: Application) : ViewModel() {
         val backgroundSkills = 2
 
         return classSkills
+    }
+
+    // Get alignment by ID
+    fun getAlignmentById(alignmentId: Int): Flow<Alignment> {
+        return characterDao.getAlignmentById(alignmentId)
+    }
+
+    // Get available feats for level and class
+    fun getAvailableFeats(level: Int, classId: Int): Flow<List<Feature>> {
+        return characterDao.getAvailableFeatsByLevel(level)
+    }
+
+    // Get class features available at current level
+    fun getClassFeaturesByLevel(classId: Int, level: Int): Flow<List<Feature>> {
+        return characterDao.getClassFeaturesByLevel(classId, level)
+    }
+
+    // Get subclass by ID
+    fun getSubclassById(subclassId: Int): Flow<Subclass> {
+        return characterDao.getSubclassById(subclassId)
+    }
+
+    // Get subclasses for a specific class
+    fun getSubclassesForClass(classId: Int): Flow<List<Subclass>> {
+        return characterDao.getSubclassesForClass(classId)
+    }
+
+    // Add a feature to character
+    fun addFeatureToCharacter(characterId: Int, featureId: Int) {
+        viewModelScope.launch {
+            // Check if the character already has this feature
+            val hasFeature = characterDao.hasCharacterFeature(characterId, featureId)
+            if (hasFeature == 0) {
+                val characterFeature = CharacterFeature(
+                    characterId = characterId,
+                    featureId = featureId
+                )
+                characterDao.insertCharacterFeature(characterFeature)
+            }
+        }
+    }
+
+    // Remove a feature from character
+    fun removeFeatureFromCharacter(characterId: Int, featureId: Int) {
+        viewModelScope.launch {
+            characterDao.deleteCharacterFeature(characterId, featureId)
+        }
+    }
+
+    // Check if character can choose subclass (level >= 3 and no subclass selected)
+    fun canChooseSubclass(character: Character): Boolean {
+        return character.level >= 3 && character.subclassId == 0
+    }
+
+    // Check if character can choose feat at current level
+    fun canChooseFeat(level: Int): Boolean {
+        val featLevels = listOf(4, 8, 12, 16, 19)
+        return level in featLevels
+    }
+
+    // Calculate available feat choices based on level
+    fun getAvailableFeatChoices(level: Int): List<Int> {
+        val featLevels = listOf(4, 8, 12, 16, 19)
+        return featLevels.filter { it <= level }
+    }
+
+    // Calculate ASI levels for a character
+    fun getAsiLevels(classId: Int): List<Int> {
+        return when (classId) {
+            // Fighter gets extra ASIs at 6 and 14
+            5 -> listOf(4, 6, 8, 12, 14, 16, 19)
+            // Rogue gets extra ASI at 10
+            9 -> listOf(4, 8, 10, 12, 16, 19)
+            // Other classes follow standard progression
+            else -> listOf(4, 8, 12, 16, 19)
+        }
+    }
+
+    // Check if character has a specific feature
+    fun hasCharacterFeature(characterId: Int, featureId: Int): Flow<Boolean> {
+        return characterDao.getCharacterFeatures(characterId)
+            .map { features -> features.any { it.featureId == featureId } }
+    }
+
+    // Get prerequisites for a feature
+    fun getFeaturePrerequisites(featureId: Int): Flow<List<String>> {
+        // This would need additional database structure for prerequisites
+        // For now, returning empty list
+        return flowOf(emptyList())
+    }
+
+    // Get character's subclass information
+    fun getCharacterSubclass(characterId: Int): Flow<Subclass?> {
+        return characterDao.getCharacterById(characterId).flatMapConcat { character ->
+            if (character.subclassId != 0) {
+                characterDao.getSubclassById(character.subclassId)
+            } else {
+                flowOf(null)
+            }
+        }
+    }
+
+    // Get equipped items
+    fun getEquippedItems(characterId: Int): Flow<List<CharacterInventory>> {
+        return characterDao.getEquippedItems(characterId)
+    }
+
+    // Get all weapons
+    fun getAllWeapons(): Flow<List<Item>> {
+        return characterDao.getAllWeapons()
+    }
+
+    // Get all armor
+    fun getAllArmor(): Flow<List<Item>> {
+        return characterDao.getAllArmor()
+    }
+
+    // Get other items
+    fun getOtherItems(): Flow<List<Item>> {
+        return characterDao.getOtherItems()
+    }
+
+    // Equip an item with validation
+    fun equipItem(characterId: Int, inventoryItem: CharacterInventory) {
+        viewModelScope.launch {
+            val item = characterDao.getAllItems().firstOrNull()?.find { it.itemId == inventoryItem.itemId }
+
+            if (item != null) {
+                when (item.itemType) {
+                    Item.ItemType.Armor -> {
+                        // Check if it's a shield
+                        val armorDetails = try {
+                            // This would require a more complex query to check armor type
+                            // For now, we'll assume all armor is body armor
+                            // You might want to add armorType to Item entity
+                            null
+                        } catch (e: Exception) {
+                            null
+                        }
+
+                        // For now, just equip armor (we'll handle shield logic separately if needed)
+                        // Unequip other armor first
+                        val equippedArmor = characterDao.getEquippedArmor(characterId).firstOrNull()
+                        equippedArmor?.forEach { equipped ->
+                            characterDao.updateEquippedStatus(equipped.inventoryId, false)
+                        }
+
+                        // Equip this item
+                        characterDao.updateEquippedStatus(inventoryItem.inventoryId, true)
+                    }
+                    Item.ItemType.Weapon -> {
+                        val equippedWeaponsCount = characterDao.countEquippedWeapons(characterId)
+
+                        if (equippedWeaponsCount < 5) {
+                            characterDao.updateEquippedStatus(inventoryItem.inventoryId, true)
+                        } else {
+                            // Show error - limit reached (you might want to add error handling)
+                            println("Weapon limit reached (max 5)")
+                        }
+                    }
+                    else -> {
+                        // For other item types, just toggle equipped status
+                        val newEquippedStatus = !inventoryItem.equipped
+                        characterDao.updateEquippedStatus(inventoryItem.inventoryId, newEquippedStatus)
+                    }
+                }
+            }
+        }
+    }
+
+    // Unequip an item
+    fun unequipItem(characterId: Int, inventoryItem: CharacterInventory) {
+        viewModelScope.launch {
+            characterDao.updateEquippedStatus(inventoryItem.inventoryId, false)
+        }
     }
 
     suspend fun getAvailableClassSkills(classId: Int): List<Skill> {

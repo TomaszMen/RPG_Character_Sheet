@@ -168,8 +168,6 @@ interface CharacterDao {
     @Query("SELECT * FROM character_spell_slots WHERE characterId = :characterId")
     fun getCharacterSpellSlots(characterId: Int): Flow<List<CharacterSpellSlot>>
 
-    // Dodaj te query do CharacterDao.kt
-
     @Query("SELECT * FROM features WHERE sourceType = 'Race' AND sourceId = :raceId")
     fun getRaceFeatures(raceId: Int): Flow<List<Feature>>
 
@@ -185,7 +183,7 @@ interface CharacterDao {
     @Query("SELECT * FROM class_spells WHERE classId = :classId")
     fun getClassSpells(classId: Int): Flow<List<ClassSpell>>
 
-    @Query("SELECT * FROM spells WHERE spellId IN (:spellIds)")
+   @Query("SELECT * FROM spells WHERE spellId IN (:spellIds)")
     fun getSpellsByIds(spellIds: List<Int>): Flow<List<Spell>>
 
     @Insert
@@ -202,6 +200,79 @@ interface CharacterDao {
 
     @Query("SELECT * FROM items WHERE itemType = 'Gear' OR itemType = 'Tool'")
     fun getStarterEquipment(): Flow<List<Item>>
+
+    // Get character's equipped items
+    @Query("SELECT * FROM character_inventory WHERE characterId = :characterId AND equipped = 1")
+    fun getEquippedItems(characterId: Int): Flow<List<CharacterInventory>>
+
+    // Update equipped status
+    @Query("UPDATE character_inventory SET equipped = :equipped WHERE inventoryId = :inventoryId")
+    suspend fun updateEquippedStatus(inventoryId: Int, equipped: Boolean)
+
+    // Count equipped weapons
+    @Query("SELECT COUNT(*) FROM character_inventory ci JOIN items i ON ci.itemId = i.itemId WHERE ci.characterId = :characterId AND ci.equipped = 1 AND i.itemType = 'Weapon'")
+    suspend fun countEquippedWeapons(characterId: Int): Int
+
+    // Get equipped armor
+    @Query("SELECT * FROM character_inventory ci JOIN items i ON ci.itemId = i.itemId WHERE ci.characterId = :characterId AND ci.equipped = 1 AND i.itemType = 'Armor'")
+    fun getEquippedArmor(characterId: Int): Flow<List<CharacterInventory>>
+
+    // Get weapons (for filtering)
+    @Query("SELECT * FROM items WHERE itemType = 'Weapon'")
+    fun getAllWeapons(): Flow<List<Item>>
+
+    // Get armor (for filtering)
+    @Query("SELECT * FROM items WHERE itemType = 'Armor'")
+    fun getAllArmor(): Flow<List<Item>>
+
+    // Get other items (for filtering)
+    @Query("SELECT * FROM items WHERE itemType NOT IN ('Weapon', 'Armor')")
+    fun getOtherItems(): Flow<List<Item>>
+
+    // Update spell slot usage
+    @Query("UPDATE character_spell_slots SET usedSlots = :usedSlots WHERE spellSlotId = :spellSlotId")
+    suspend fun updateSpellSlotUsed(spellSlotId: Int, usedSlots: Int)
+
+    // Get available feats for a given level and class
+    @Query("""
+    SELECT * FROM features 
+    WHERE sourceType = 'Feat' 
+    AND levelRequirement <= :level
+    ORDER BY levelRequirement ASC
+    """)
+    fun getAvailableFeatsByLevel(level: Int): Flow<List<Feature>>
+
+    // Get class features available at specific level
+    @Query("""
+    SELECT * FROM features 
+    WHERE sourceType IN ('Class', 'Subclass') 
+    AND sourceId = :classId 
+    AND levelRequirement <= :level
+    ORDER BY levelRequirement ASC
+    """)
+    fun getClassFeaturesByLevel(classId: Int, level: Int): Flow<List<Feature>>
+
+    // Get subclasses for a specific class
+    @Query("SELECT * FROM subclasses WHERE classId = :classId")
+    fun getSubclassesForClass(classId: Int): Flow<List<Subclass>>
+
+    // Insert a character feature
+    @Insert
+    suspend fun insertCharacterFeature(characterFeature: CharacterFeature)
+
+    // Delete a character feature by characterId and featureId
+    @Query("""
+    DELETE FROM character_features 
+    WHERE characterId = :characterId AND featureId = :featureId
+    """)
+    suspend fun deleteCharacterFeature(characterId: Int, featureId: Int)
+
+    // Check if a character already has a specific feature
+    @Query("""
+    SELECT COUNT(*) FROM character_features 
+    WHERE characterId = :characterId AND featureId = :featureId
+    """)
+    suspend fun hasCharacterFeature(characterId: Int, featureId: Int): Int
 
 }
 data class WeaponAndItem(
