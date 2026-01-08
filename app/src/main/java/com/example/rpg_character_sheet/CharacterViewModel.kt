@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -15,10 +16,9 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import table_entities.*
+import java.util.*
+import kotlin.math.floor
 
-
-// Creates the CharacterViewModel instance inside UI elements so it doesn't need to passed as an argument
-// Creates the CharacterViewModel instance inside UI elements so it doesn't need to passed as an argument
 class CharacterViewModelFactory(private val application: Application) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return CharacterViewModel(application) as T
@@ -26,31 +26,43 @@ class CharacterViewModelFactory(private val application: Application) : ViewMode
 }
 
 class CharacterViewModel(application: Application) : ViewModel() {
-	// Data access objects
-	private val characterDao: CharacterDao = CharacterDatabase.getDatabase(application).characterDao()
+    // Data access objects
+    private val characterDao: CharacterDao = CharacterDatabase.getDatabase(application).characterDao()
 
-	// Allows reading and writing data
-	private val _characters = MutableStateFlow<List<Character>>(emptyList())
-	private val _selectedCharacterId = MutableStateFlow(1)
+    // Allows reading and writing data
+    private val _characters = MutableStateFlow<List<Character>>(emptyList())
+    private val _selectedCharacterId = MutableStateFlow(1)
 
-	// Allows only reading the data
-	val characters: StateFlow<List<Character>> get() = _characters
-	val selectedCharacterId: StateFlow<Int> get() = _selectedCharacterId
+    // New states for CharacterPlayScreen
+    private val _characterSkills = MutableStateFlow<List<CharacterSkill>>(emptyList())
+    private val _characterSavingThrows = MutableStateFlow<List<CharacterSavingThrow>>(emptyList())
+    private val _calculatedAC = MutableStateFlow<Int?>(null)
 
+    // Allows only reading the data
+    val characters: StateFlow<List<Character>> get() = _characters
+    val selectedCharacterId: StateFlow<Int> get() = _selectedCharacterId
 
-	// Called upon creation of each instance
-	init {
-		fetchData()
-	}
+    // New state flows for CharacterPlayScreen
+    //val characterSkillsState: StateFlow<List<CharacterSkill>> get() = _characterSkills.asStateFlow()
+    //val characterSavingThrowsState: StateFlow<List<CharacterSavingThrow>> get() = _characterSavingThrows.asStateFlow()
+    //val calculatedAC: StateFlow<Int?> get() = _calculatedAC.asStateFlow()
+    val characterSkillsState: StateFlow<List<CharacterSkill>> = _characterSkills
+    val characterSavingThrowsState: StateFlow<List<CharacterSavingThrow>> = _characterSavingThrows
+    val calculatedAC: StateFlow<Int?> = _calculatedAC
 
-	private fun fetchData() {
-		viewModelScope.launch {
-			// Fetch characters
-			characterDao.getAllCharacters().collect { characterList ->
-				_characters.value = characterList
-			}
-		}
-	}
+    // Called upon creation of each instance
+    init {
+        fetchData()
+    }
+
+    private fun fetchData() {
+        viewModelScope.launch {
+            // Fetch characters
+            characterDao.getAllCharacters().collect { characterList ->
+                _characters.value = characterList
+            }
+        }
+    }
 
     data class StartingEquipmentOption(
         val name: String,
@@ -153,62 +165,68 @@ class CharacterViewModel(application: Application) : ViewModel() {
         }
     }
 
-	fun selectCharacter(characterId: Int) {
-		_selectedCharacterId.value = characterId
-	}
+    fun selectCharacter(characterId: Int) {
+        _selectedCharacterId.value = characterId
+        // Load additional data for the selected character
+        viewModelScope.launch {
+            loadCharacterSkills(characterId)
+            loadCharacterSavingThrows(characterId)
+            calculateAndUpdateAC(characterId)
+        }
+    }
 
-	fun getSelectedCharacter() : Flow<Character> {
-		return characterDao.getCharacterById(_selectedCharacterId.value)
-	}
+    fun getSelectedCharacter() : Flow<Character> {
+        return characterDao.getCharacterById(_selectedCharacterId.value)
+    }
 
-	fun getCharacterById(characterId: Int): Flow<Character> {
-		return characterDao.getCharacterById(characterId)
-	}
+    fun getCharacterById(characterId: Int): Flow<Character> {
+        return characterDao.getCharacterById(characterId)
+    }
 
-	fun insertCharacter(character: Character) {
-		viewModelScope.launch {
-			characterDao.insert(character)
-		}
-	}
+    fun insertCharacter(character: Character) {
+        viewModelScope.launch {
+            characterDao.insert(character)
+        }
+    }
 
-	fun updateCharacter(character: Character) {
-		viewModelScope.launch {
-			characterDao.update(character)
-		}
-	}
+    fun updateCharacter(character: Character) {
+        viewModelScope.launch {
+            characterDao.update(character)
+        }
+    }
 
-	fun updateCharacterName(character: Character, newName: String) {
-		viewModelScope.launch {
-			characterDao.updateCharacterName(character.characterId, newName)
-		}
-	}
+    fun updateCharacterName(character: Character, newName: String) {
+        viewModelScope.launch {
+            characterDao.updateCharacterName(character.characterId, newName)
+        }
+    }
 
-	fun updateCharacterLevel(character: Character, newLevel: Int) {
-		viewModelScope.launch {
-			characterDao.updateCharacterLevel(character.characterId, newLevel)
-		}
-	}
+    fun updateCharacterLevel(character: Character, newLevel: Int) {
+        viewModelScope.launch {
+            characterDao.updateCharacterLevel(character.characterId, newLevel)
+        }
+    }
 
-	fun deleteCharacter(character: Character) {
-		viewModelScope.launch {
-			characterDao.delete(character)
-		}
-	}
+    fun deleteCharacter(character: Character) {
+        viewModelScope.launch {
+            characterDao.delete(character)
+        }
+    }
 
-	// Classes
-	fun getClassById(classId: Int): Flow<CharacterClass> {
-		return characterDao.getClassById(classId)
-	}
+    // Classes
+    fun getClassById(classId: Int): Flow<CharacterClass> {
+        return characterDao.getClassById(classId)
+    }
 
-	fun getClassByIdAsPair(classId: Int): Flow<Pair<Int, String>> {
-		return characterDao.getClassById(classId).map { it.classId to it.className }
-	}
+    fun getClassByIdAsPair(classId: Int): Flow<Pair<Int, String>> {
+        return characterDao.getClassById(classId).map { it.classId to it.className }
+    }
 
-	fun getAllClassesAsPair(): Flow<List<Pair<Int, String>>> {
-		return characterDao.getAllClasses().map { characterClass ->
-			characterClass.map { it.classId to it.className }
-		}
-	}
+    fun getAllClassesAsPair(): Flow<List<Pair<Int, String>>> {
+        return characterDao.getAllClasses().map { characterClass ->
+            characterClass.map { it.classId to it.className }
+        }
+    }
 
     fun getAllBackgroundsAsPairs(): Flow<List<Pair<Int, String>>> {
         return characterDao.getAllBackgrounds().map { characterBackground ->
@@ -222,11 +240,11 @@ class CharacterViewModel(application: Application) : ViewModel() {
         }
     }
 
-	fun updateCharacterClass(character: Character, newClassId: Int) {
-		viewModelScope.launch {
-			characterDao.updateCharacterClass(character.characterId, newClassId)
-		}
-	}
+    fun updateCharacterClass(character: Character, newClassId: Int) {
+        viewModelScope.launch {
+            characterDao.updateCharacterClass(character.characterId, newClassId)
+        }
+    }
 
     // Background queries
     fun getBackgroundById(backgroundId: Int): Flow<Background> {
@@ -256,106 +274,106 @@ class CharacterViewModel(application: Application) : ViewModel() {
         return characterDao.getAllSkills()
     }
 
-	// Subclasses
-	fun getSubclassByIdAsPair(subclassId: Int): Flow<Pair<Int, String>> {
-		return characterDao.getSubclassById(subclassId).map { it.subclassId to it.subclassName }
-	}
+    // Subclasses
+    fun getSubclassByIdAsPair(subclassId: Int): Flow<Pair<Int, String>> {
+        return characterDao.getSubclassById(subclassId).map { it.subclassId to it.subclassName }
+    }
 
-	fun getAllSubclasses(): Flow<List<Subclass>> {
-		return characterDao.getAllSubclasses()
-	}
+    fun getAllSubclasses(): Flow<List<Subclass>> {
+        return characterDao.getAllSubclasses()
+    }
 
-	fun getSubclassesOfClassAsPairs(classId: Int): Flow<List<Pair<Int, String>>> {
-		return characterDao.getSubclassesOfClass(classId).map { subclass ->
-			subclass.map { it.subclassId to it.subclassName }
-		}
-	}
+    fun getSubclassesOfClassAsPairs(classId: Int): Flow<List<Pair<Int, String>>> {
+        return characterDao.getSubclassesOfClass(classId).map { subclass ->
+            subclass.map { it.subclassId to it.subclassName }
+        }
+    }
 
-	fun updateCharacterSubclass(character: Character, newSubclassId: Int) {
-		viewModelScope.launch {
-			characterDao.updateCharacterSubclass(character.characterId, newSubclassId)
-		}
-	}
+    fun updateCharacterSubclass(character: Character, newSubclassId: Int) {
+        viewModelScope.launch {
+            characterDao.updateCharacterSubclass(character.characterId, newSubclassId)
+        }
+    }
 
-	// Races
-	fun getRaceById(raceId: Int): Flow<Race> {
-		return characterDao.getRaceById(raceId)
-	}
+    // Races
+    fun getRaceById(raceId: Int): Flow<Race> {
+        return characterDao.getRaceById(raceId)
+    }
 
-	fun getAllItems(): Flow<List<Item>> {
-		return characterDao.getAllItems()
-	}
+    fun getAllItems(): Flow<List<Item>> {
+        return characterDao.getAllItems()
+    }
 
-	fun getCharacterInventory(characterId: Int): Flow<List<CharacterInventory>> {
-		return characterDao.getCharacterInventory(characterId)
-	}
+    fun getCharacterInventory(characterId: Int): Flow<List<CharacterInventory>> {
+        return characterDao.getCharacterInventory(characterId)
+    }
 
-	fun addItemToInventory(characterId: Int, itemId: Int) {
-		viewModelScope.launch {
-			// Check if item already exists in inventory
-			val existing = characterDao.getCharacterInventory(characterId).firstOrNull()?.find { it.itemId == itemId }
+    fun addItemToInventory(characterId: Int, itemId: Int) {
+        viewModelScope.launch {
+            // Check if item already exists in inventory
+            val existing = characterDao.getCharacterInventory(characterId).firstOrNull()?.find { it.itemId == itemId }
 
-			if (existing != null) {
-				// If exists, increment quantity
-				val updated = existing.copy(quantity = existing.quantity + 1)
-				characterDao.updateCharacterInventory(updated)
-			} else {
-				// If not exists, add new entry
-				val newItem = CharacterInventory(
-					characterId = characterId,
-					itemId = itemId,
-					quantity = 1,
-					equipped = false
-				)
-				characterDao.insertCharacterInventory(newItem)
-			}
-		}
-	}
+            if (existing != null) {
+                // If exists, increment quantity
+                val updated = existing.copy(quantity = existing.quantity + 1)
+                characterDao.updateCharacterInventory(updated)
+            } else {
+                // If not exists, add new entry
+                val newItem = CharacterInventory(
+                    characterId = characterId,
+                    itemId = itemId,
+                    quantity = 1,
+                    equipped = false
+                )
+                characterDao.insertCharacterInventory(newItem)
+            }
+        }
+    }
 
-	fun removeItemFromInventory(characterInventory: CharacterInventory) {
-		viewModelScope.launch {
-			if (characterInventory.quantity > 1) {
-				// If more than one, decrement quantity
-				val updated = characterInventory.copy(quantity = characterInventory.quantity - 1)
-				characterDao.updateCharacterInventory(updated)
-			} else {
-				// If only one, remove entirely
-				characterDao.deleteCharacterInventory(characterInventory)
-			}
-		}
-	}
+    fun removeItemFromInventory(characterInventory: CharacterInventory) {
+        viewModelScope.launch {
+            if (characterInventory.quantity > 1) {
+                // If more than one, decrement quantity
+                val updated = characterInventory.copy(quantity = characterInventory.quantity - 1)
+                characterDao.updateCharacterInventory(updated)
+            } else {
+                // If only one, remove entirely
+                characterDao.deleteCharacterInventory(characterInventory)
+            }
+        }
+    }
 
-	fun getCharacterWeapons(characterId: Int): Flow<List<WeaponAndItem>> {
-		return characterDao.getCharacterWeapons(characterId)
-	}
+    fun getCharacterWeapons(characterId: Int): Flow<List<WeaponAndItem>> {
+        return characterDao.getCharacterWeapons(characterId)
+    }
 
-	fun getCharacterSpells(characterId: Int): Flow<List<Spell>> {
-		return characterDao.getCharacterSpells(characterId)
-	}
+    fun getCharacterSpells(characterId: Int): Flow<List<Spell>> {
+        return characterDao.getCharacterSpells(characterId)
+    }
 
-	fun getCharacterFeatures(characterId: Int): Flow<List<Feature>> {
-		return characterDao.getCharacterFeatures(characterId)
-	}
+    fun getCharacterFeatures(characterId: Int): Flow<List<Feature>> {
+        return characterDao.getCharacterFeatures(characterId)
+    }
 
-	fun getCharacterSpellSlots(characterId: Int): Flow<List<CharacterSpellSlot>> {
-		return characterDao.getCharacterSpellSlots(characterId)
-	}
+    fun getCharacterSpellSlots(characterId: Int): Flow<List<CharacterSpellSlot>> {
+        return characterDao.getCharacterSpellSlots(characterId)
+    }
 
-	fun getRaceByIdAsPair(raceId: Int): Flow<Pair<Int, String>> {
-		return characterDao.getRaceById(raceId).map { it.raceId to it.raceName }
-	}
+    fun getRaceByIdAsPair(raceId: Int): Flow<Pair<Int, String>> {
+        return characterDao.getRaceById(raceId).map { it.raceId to it.raceName }
+    }
 
-	fun getAllRacesAsPairs(): Flow<List<Pair<Int, String>>> {
-		return characterDao.getAllRaces().map { race ->
-			race.map { it.raceId to it.raceName }
-		}
-	}
+    fun getAllRacesAsPairs(): Flow<List<Pair<Int, String>>> {
+        return characterDao.getAllRaces().map { race ->
+            race.map { it.raceId to it.raceName }
+        }
+    }
 
-	fun updateCharacterRace(character: Character, newRaceId: Int) {
-		viewModelScope.launch {
-			characterDao.updateCharacterRace(character.characterId, newRaceId)
-		}
-	}
+    fun updateCharacterRace(character: Character, newRaceId: Int) {
+        viewModelScope.launch {
+            characterDao.updateCharacterRace(character.characterId, newRaceId)
+        }
+    }
 
     fun getSubracesForRace(raceId: Int): Flow<List<Pair<Int, String>>> {
         return characterDao.getSubracesOfRace(raceId).map { subraces ->
@@ -363,25 +381,25 @@ class CharacterViewModel(application: Application) : ViewModel() {
         }
     }
 
-	fun getAllSubraces(): Flow<List<Subrace>> {
-		return characterDao.getAllSubraces()
-	}
+    fun getAllSubraces(): Flow<List<Subrace>> {
+        return characterDao.getAllSubraces()
+    }
 
-	fun getSubraceByIdAsPair(subraceId: Int): Flow<Pair<Int, String>> {
-		return characterDao.getSubraceById(subraceId).map { it.subraceId to it.subraceName }
-	}
+    fun getSubraceByIdAsPair(subraceId: Int): Flow<Pair<Int, String>> {
+        return characterDao.getSubraceById(subraceId).map { it.subraceId to it.subraceName }
+    }
 
-	fun getSubracesOfRaceAsPairs(raceId: Int): Flow<List<Pair<Int, String>>> {
-		return characterDao.getSubracesOfRace(raceId).map { subrace ->
-			subrace.map { it.subraceId to it.subraceName }
-		}
-	}
+    fun getSubracesOfRaceAsPairs(raceId: Int): Flow<List<Pair<Int, String>>> {
+        return characterDao.getSubracesOfRace(raceId).map { subrace ->
+            subrace.map { it.subraceId to it.subraceName }
+        }
+    }
 
-	fun updateCharacterSubrace(character: Character, newSubraceId: Int) {
-		viewModelScope.launch {
-			characterDao.updateCharacterSubrace(character.characterId, newSubraceId)
-		}
-	}
+    fun updateCharacterSubrace(character: Character, newSubraceId: Int) {
+        viewModelScope.launch {
+            characterDao.updateCharacterSubrace(character.characterId, newSubraceId)
+        }
+    }
 
     fun getMaxSkillProficiencies(classId: Int, backgroundId: Int): Int {
         // Base class skills
@@ -607,12 +625,12 @@ class CharacterViewModel(application: Application) : ViewModel() {
         return allSkills.filter { it.abilityScore.toString() in abilities }
     }
 
-	// Stats
-	fun updateCharacterStats(characterId: Int, str: Int, dex: Int, con: Int, int: Int, wis: Int, cha: Int) {
-		viewModelScope.launch {
-			characterDao.updateCharacterStats(characterId, str, dex, con, int, wis, cha)
-		}
-	}
+    // Stats
+    fun updateCharacterStats(characterId: Int, str: Int, dex: Int, con: Int, int: Int, wis: Int, cha: Int) {
+        viewModelScope.launch {
+            characterDao.updateCharacterStats(characterId, str, dex, con, int, wis, cha)
+        }
+    }
 
     fun createNewCharacterSimple(characterData: CharacterCreationDataSimple) {
         viewModelScope.launch {
@@ -682,4 +700,118 @@ class CharacterViewModel(application: Application) : ViewModel() {
         val skillProficiencies: List<Int> = emptyList(),
         val equipment: List<Int> = emptyList()
     )
+
+    // ==============================
+    // NEW FUNCTIONS FOR CHARACTER PLAY SCREEN
+    // ==============================
+
+    // Load character skills for selected character
+    private fun loadCharacterSkills(characterId: Int) {
+        viewModelScope.launch {
+            characterDao.getCharacterSkills(characterId).collect { skills ->
+                _characterSkills.value = skills
+            }
+        }
+    }
+
+    // Load character saving throws for selected character
+    private fun loadCharacterSavingThrows(characterId: Int) {
+        viewModelScope.launch {
+            characterDao.getCharacterSavingThrows(characterId).collect { savingThrows ->
+                _characterSavingThrows.value = savingThrows
+            }
+        }
+    }
+
+    // Calculate and update AC for selected character
+    private fun calculateAndUpdateAC(characterId: Int) {
+        viewModelScope.launch {
+            // Get character data
+            val character = characterDao.getCharacterById(characterId).firstOrNull()
+            character?.let {
+                val baseAC = 10
+                val dexMod = calculateAbilityModifier(it.dexterity)
+                // Add armor bonus from equipped armor (simplified for now)
+                val totalAC = baseAC + dexMod
+
+                _calculatedAC.value = totalAC
+            }
+        }
+    }
+
+    fun updateCurrentHP(characterId: Int, currentHP: Int) {
+        viewModelScope.launch {
+            characterDao.updateCurrentHP(characterId, currentHP)
+        }
+    }
+
+    fun updateTemporaryHP(characterId: Int, tempHP: Int) {
+        viewModelScope.launch {
+            characterDao.updateTemporaryHP(characterId, tempHP)
+        }
+    }
+
+    fun updateInitiative(characterId: Int, initiative: Int) {
+        viewModelScope.launch {
+            characterDao.updateInitiative(characterId, initiative)
+        }
+    }
+
+    // Helper function to calculate ability modifier (for use in UI)
+    fun calculateAbilityModifier(score: Int): Int {
+        return floor((score - 10) / 2.0).toInt()
+    }
+
+    // Helper function to calculate proficiency bonus (for use in UI)
+    fun calculateProficiencyBonus(level: Int): Int {
+        return when (level) {
+            in 1..4 -> 2
+            in 5..8 -> 3
+            in 9..12 -> 4
+            in 13..16 -> 5
+            in 17..20 -> 6
+            else -> 2
+        }
+    }
+
+    // Helper function to roll d20 (for use in UI)
+    fun rollD20(): Int {
+        return Random().nextInt(20) + 1
+    }
+
+    // Roll dice with modifiers (for use in UI)
+    fun rollDiceWithModifiers(
+        characterId: Int,
+        diceType: String = "d20",
+        modifier: Int = 0
+    ): DiceRollResult {
+        val roll = when (diceType) {
+            "d20" -> rollD20()
+            "d12" -> Random().nextInt(12) + 1
+            "d10" -> Random().nextInt(10) + 1
+            "d8" -> Random().nextInt(8) + 1
+            "d6" -> Random().nextInt(6) + 1
+            "d4" -> Random().nextInt(4) + 1
+            "d100" -> Random().nextInt(100) + 1
+            else -> rollD20()
+        }
+
+        val total = roll + modifier
+
+        return DiceRollResult(
+            label = "Dice Roll",
+            diceType = diceType,
+            roll = roll,
+            modifier = modifier,
+            total = total
+        )
+    }
 }
+
+data class DiceRollResult(
+    val label: String,
+    val diceType: String,
+    val roll: Int,
+    val modifier: Int,
+    val total: Int
+)

@@ -189,6 +189,81 @@ interface CharacterDao {
     @Insert
     suspend fun insertCharacterSkill(characterSkill: CharacterSkill)
 
+    // Get character skills for the selected character
+    @Query("SELECT * FROM character_skills WHERE characterId = :characterId")
+    fun getCharacterSkills(characterId: Int): Flow<List<CharacterSkill>>
+
+    // Get character saving throws for the selected character
+    @Query("SELECT * FROM character_saving_throws WHERE characterId = :characterId")
+    fun getCharacterSavingThrows(characterId: Int): Flow<List<CharacterSavingThrow>>
+
+    // Get character skills with skill names (optional, ale przydatne)
+    @Transaction
+    @Query("""
+        SELECT cs.*, s.skillName, s.abilityScore 
+        FROM character_skills cs 
+        JOIN skills s ON cs.skillId = s.skillId 
+        WHERE cs.characterId = :characterId
+    """)
+    fun getCharacterSkillsWithDetails(characterId: Int): Flow<List<CharacterSkillWithDetails>>
+
+    // Update HP
+    @Query("UPDATE characters SET currentHitPoints = :currentHP WHERE characterId = :characterId")
+    suspend fun updateCurrentHP(characterId: Int, currentHP: Int)
+
+    // Update temporary HP
+    @Query("UPDATE characters SET temporaryHitPoints = :tempHP WHERE characterId = :characterId")
+    suspend fun updateTemporaryHP(characterId: Int, tempHP: Int)
+
+    // Update AC
+    @Query("UPDATE characters SET armorClass = :ac WHERE characterId = :characterId")
+    suspend fun updateArmorClass(characterId: Int, ac: Int)
+
+    // Update initiative
+    @Query("UPDATE characters SET initiative = :initiative WHERE characterId = :characterId")
+    suspend fun updateInitiative(characterId: Int, initiative: Int)
+
+    // Get equipped armor AC bonus
+    @Query("""
+        SELECT COALESCE(SUM(a.armorClass), 0) 
+        FROM character_inventory ci 
+        JOIN items i ON ci.itemId = i.itemId 
+        LEFT JOIN armors a ON ci.itemId = a.itemId 
+        WHERE ci.characterId = :characterId 
+        AND ci.equipped = 1 
+        AND i.itemType = 'Armor'
+    """)
+    fun getEquippedArmorAC(characterId: Int): Flow<Int>
+
+    // Get shield AC bonus
+    @Query("""
+        SELECT COALESCE(SUM(a.armorClass), 0) 
+        FROM character_inventory ci 
+        JOIN items i ON ci.itemId = i.itemId 
+        LEFT JOIN armors a ON ci.itemId = a.itemId 
+        WHERE ci.characterId = :characterId 
+        AND ci.equipped = 1 
+        AND a.armorType = 'Shield'
+    """)
+    fun getEquippedShieldAC(characterId: Int): Flow<Int>
+
+    // Calculate total AC based on equipped items and stats
+    @Transaction
+    @Query("""
+        SELECT 
+            c.*,
+            COALESCE(SUM(a.armorClass), 0) as armorBonus,
+            COALESCE(SUM(s.armorClass), 0) as shieldBonus
+        FROM characters c
+        LEFT JOIN character_inventory ci ON c.characterId = ci.characterId AND ci.equipped = 1
+        LEFT JOIN items i ON ci.itemId = i.itemId
+        LEFT JOIN armors a ON ci.itemId = a.itemId AND a.armorType != 'Shield'
+        LEFT JOIN armors s ON ci.itemId = s.itemId AND s.armorType = 'Shield'
+        WHERE c.characterId = :characterId
+        GROUP BY c.characterId
+    """)
+    fun getCharacterWithACCalculation(characterId: Int): Flow<CharacterWithAC>
+
     @Insert
     suspend fun insertCharacterLanguage(characterLanguage: CharacterLanguage)
 
@@ -282,4 +357,19 @@ data class WeaponAndItem(
         entityColumn = "itemId"
     )
     val item: Item
+)
+
+data class CharacterSkillWithDetails(
+    @Embedded val characterSkill: CharacterSkill,
+    @Relation(
+        parentColumn = "skillId",
+        entityColumn = "skillId"
+    )
+    val skill: Skill
+)
+
+data class CharacterWithAC(
+    @Embedded val character: Character,
+    val armorBonus: Int = 0,
+    val shieldBonus: Int = 0
 )
