@@ -806,6 +806,168 @@ class CharacterViewModel(application: Application) : ViewModel() {
             total = total
         )
     }
+
+    // Add these functions to your CharacterViewModel class:
+
+    // Get class spells by class ID
+    fun getClassSpells(classId: Int): Flow<List<ClassSpell>> {
+        return characterDao.getClassSpells(classId)
+    }
+
+    // Get spells by their IDs
+    fun getSpellsByIds(spellIds: List<Int>): Flow<List<Spell>> {
+        return characterDao.getSpellsByIds(spellIds)
+    }
+
+    // Update spell slot usage
+    fun updateSpellSlotUsed(spellSlotId: Int, usedSlots: Int) {
+        viewModelScope.launch {
+            characterDao.updateSpellSlotUsed(spellSlotId, usedSlots)
+        }
+    }
+
+    // Add function to add a spell to character
+    fun addSpellToCharacter(characterId: Int, spellId: Int) {
+        viewModelScope.launch {
+            // Check if spell already exists for this character
+            val existingSpells = characterDao.getCharacterSpells(characterId).firstOrNull()
+            val alreadyHasSpell = existingSpells?.any { it.spellId == spellId } ?: false
+
+            if (!alreadyHasSpell) {
+                val characterSpell = CharacterSpell(
+                    characterId = characterId,
+                    spellId = spellId,
+                    prepared = 1
+                )
+                characterDao.insertCharacterSpell(characterSpell)
+            }
+        }
+    }
+
+    // Get spells available for a character based on their class and level
+    fun getAvailableSpellsForCharacter(character: Character): Flow<List<Spell>> {
+        return characterDao.getClassSpells(character.classId).flatMapConcat { classSpells ->
+            val spellIds = classSpells.map { it.spellId }
+            characterDao.getSpellsByIds(spellIds).map { spells ->
+                // Filter spells by character level (spell level must be <= character level / 2 + 1)
+                spells.filter { spell ->
+                    spell.spellLevel == 0 ||  // Cantrips are always available
+                            (spell.spellLevel <= (character.level / 2) + 1)  // Leveled spells based on character level
+                }
+            }
+        }
+    }
+
+    // Initialize default spell slots for a character
+    fun initializeDefaultSpellSlots(characterId: Int, classId: Int, level: Int) {
+        viewModelScope.launch {
+            val expectedSlots = calculateExpectedSpellSlotsForClass(classId, level)
+
+            // Clear existing slots first
+            val existingSlots = characterDao.getCharacterSpellSlots(characterId).firstOrNull()
+
+            // For each spell level, create or update slots
+            expectedSlots.forEach { (spellLevel, totalSlots) ->
+                if (totalSlots > 0) {
+                    // Check if slot already exists
+                    val existingSlot = existingSlots?.find { it.spellLevel == spellLevel }
+
+                    if (existingSlot != null) {
+                        // Update existing slot
+                        characterDao.updateSpellSlotUsed(
+                            existingSlot.spellSlotId,
+                            0  // Reset used slots
+                        )
+                    } else {
+                        // Create new spell slot (requires additional DAO method)
+                        // We'll implement this later
+                    }
+                }
+            }
+        }
+    }
+
+    // Calculate expected spell slots based on class and level
+    private fun calculateExpectedSpellSlotsForClass(classId: Int, level: Int): Map<Int, Int> {
+        val slots = mutableMapOf<Int, Int>()
+
+        when (classId) {
+            // Full casters (Wizard, Cleric, Druid, Bard, Sorcerer)
+            2, 3, 4, 10, 12 -> {
+                when (level) {
+                    1 -> slots[1] = 2
+                    2 -> slots[1] = 3
+                    3 -> { slots[1] = 4; slots[2] = 2 }
+                    4 -> { slots[1] = 4; slots[2] = 3 }
+                    5 -> { slots[1] = 4; slots[2] = 3; slots[3] = 2 }
+                    6 -> { slots[1] = 4; slots[2] = 3; slots[3] = 3 }
+                    7 -> { slots[1] = 4; slots[2] = 3; slots[3] = 3; slots[4] = 1 }
+                    8 -> { slots[1] = 4; slots[2] = 3; slots[3] = 3; slots[4] = 2 }
+                    9 -> { slots[1] = 4; slots[2] = 3; slots[3] = 3; slots[4] = 3; slots[5] = 1 }
+                    10 -> { slots[1] = 4; slots[2] = 3; slots[3] = 3; slots[4] = 3; slots[5] = 2 }
+                    11 -> { slots[1] = 4; slots[2] = 3; slots[3] = 3; slots[4] = 3; slots[5] = 2; slots[6] = 1 }
+                    12 -> { slots[1] = 4; slots[2] = 3; slots[3] = 3; slots[4] = 3; slots[5] = 2; slots[6] = 1 }
+                    13 -> { slots[1] = 4; slots[2] = 3; slots[3] = 3; slots[4] = 3; slots[5] = 2; slots[6] = 1; slots[7] = 1 }
+                    14 -> { slots[1] = 4; slots[2] = 3; slots[3] = 3; slots[4] = 3; slots[5] = 2; slots[6] = 1; slots[7] = 1 }
+                    15 -> { slots[1] = 4; slots[2] = 3; slots[3] = 3; slots[4] = 3; slots[5] = 2; slots[6] = 1; slots[7] = 1; slots[8] = 1 }
+                    16 -> { slots[1] = 4; slots[2] = 3; slots[3] = 3; slots[4] = 3; slots[5] = 2; slots[6] = 1; slots[7] = 1; slots[8] = 1 }
+                    17 -> { slots[1] = 4; slots[2] = 3; slots[3] = 3; slots[4] = 3; slots[5] = 2; slots[6] = 1; slots[7] = 1; slots[8] = 1; slots[9] = 1 }
+                    18 -> { slots[1] = 4; slots[2] = 3; slots[3] = 3; slots[4] = 3; slots[5] = 3; slots[6] = 1; slots[7] = 1; slots[8] = 1; slots[9] = 1 }
+                    19 -> { slots[1] = 4; slots[2] = 3; slots[3] = 3; slots[4] = 3; slots[5] = 3; slots[6] = 2; slots[7] = 1; slots[8] = 1; slots[9] = 1 }
+                    20 -> { slots[1] = 4; slots[2] = 3; slots[3] = 3; slots[4] = 3; slots[5] = 3; slots[6] = 2; slots[7] = 2; slots[8] = 1; slots[9] = 1 }
+                }
+            }
+            // Paladin, Ranger (half casters)
+            7, 8 -> {
+                when (level) {
+                    2 -> slots[1] = 2
+                    3 -> slots[1] = 3
+                    4 -> slots[1] = 3
+                    5 -> { slots[1] = 4; slots[2] = 2 }
+                    6 -> { slots[1] = 4; slots[2] = 2 }
+                    7 -> { slots[1] = 4; slots[2] = 3 }
+                    8 -> { slots[1] = 4; slots[2] = 3 }
+                    9 -> { slots[1] = 4; slots[2] = 3; slots[3] = 2 }
+                    10 -> { slots[1] = 4; slots[2] = 3; slots[3] = 2 }
+                    11 -> { slots[1] = 4; slots[2] = 3; slots[3] = 3 }
+                    12 -> { slots[1] = 4; slots[2] = 3; slots[3] = 3 }
+                    13 -> { slots[1] = 4; slots[2] = 3; slots[3] = 3; slots[4] = 1 }
+                    14 -> { slots[1] = 4; slots[2] = 3; slots[3] = 3; slots[4] = 1 }
+                    15 -> { slots[1] = 4; slots[2] = 3; slots[3] = 3; slots[4] = 2 }
+                    16 -> { slots[1] = 4; slots[2] = 3; slots[3] = 3; slots[4] = 2 }
+                    17 -> { slots[1] = 4; slots[2] = 3; slots[3] = 3; slots[4] = 3; slots[5] = 1 }
+                    18 -> { slots[1] = 4; slots[2] = 3; slots[3] = 3; slots[4] = 3; slots[5] = 1 }
+                    19 -> { slots[1] = 4; slots[2] = 3; slots[3] = 3; slots[4] = 3; slots[5] = 2 }
+                    20 -> { slots[1] = 4; slots[2] = 3; slots[3] = 3; slots[4] = 3; slots[5] = 2 }
+                }
+            }
+            // Warlock (pact magic)
+            11 -> {
+                val slotLevel = when {
+                    level >= 9 -> 5
+                    level >= 7 -> 4
+                    level >= 5 -> 3
+                    level >= 3 -> 2
+                    else -> 1
+                }
+
+                val numberOfSlots = when {
+                    level >= 17 -> 4
+                    level >= 11 -> 3
+                    level >= 2 -> 2
+                    else -> 1
+                }
+
+                slots[slotLevel] = numberOfSlots
+            }
+            // Non-spellcasters get no slots
+            else -> {
+                // No spell slots
+            }
+        }
+
+        return slots
+    }
 }
 
 data class DiceRollResult(

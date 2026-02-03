@@ -304,10 +304,6 @@ interface CharacterDao {
     @Query("SELECT * FROM items WHERE itemType NOT IN ('Weapon', 'Armor')")
     fun getOtherItems(): Flow<List<Item>>
 
-    // Update spell slot usage
-    @Query("UPDATE character_spell_slots SET usedSlots = :usedSlots WHERE spellSlotId = :spellSlotId")
-    suspend fun updateSpellSlotUsed(spellSlotId: Int, usedSlots: Int)
-
     // Get available feats for a given level and class
     @Query("""
     SELECT * FROM features 
@@ -348,6 +344,148 @@ interface CharacterDao {
     WHERE characterId = :characterId AND featureId = :featureId
     """)
     suspend fun hasCharacterFeature(characterId: Int, featureId: Int): Int
+
+    @Query("UPDATE character_spell_slots SET usedSlots = :usedSlots WHERE spellSlotId = :spellSlotId")
+    suspend fun updateSpellSlotUsed(spellSlotId: Int, usedSlots: Int)
+
+    // Add this function for deleting character spells by characterId and spellId
+    @Query("DELETE FROM character_spells WHERE characterId = :characterId AND spellId = :spellId")
+    suspend fun deleteCharacterSpell(characterId: Int, spellId: Int)
+
+    // Add this function for getting all spells (for filtering)
+    @Query("SELECT * FROM spells ORDER BY spellLevel ASC, spellName ASC")
+    fun getAllSpells(): Flow<List<Spell>>
+
+    // Add this function for getting spells by level
+    @Query("SELECT * FROM spells WHERE spellLevel = :level ORDER BY spellName ASC")
+    fun getSpellsByLevel(level: Int): Flow<List<Spell>>
+
+    // Add this function for getting spells by class and level
+    @Query("""
+    SELECT s.* FROM spells s
+    JOIN class_spells cs ON s.spellId = cs.spellId
+    WHERE cs.classId = :classId AND s.spellLevel <= :maxLevel
+    ORDER BY s.spellLevel ASC, s.spellName ASC
+""")
+    fun getSpellsByClassAndLevel(classId: Int, maxLevel: Int): Flow<List<Spell>>
+
+    // Add this function for getting spells by school
+    @Query("SELECT * FROM spells WHERE school = :school ORDER BY spellLevel ASC, spellName ASC")
+    fun getSpellsBySchool(school: String): Flow<List<Spell>>
+
+    // Add this function for inserting character spell slots
+    @Insert
+    suspend fun insertCharacterSpellSlot(characterSpellSlot: CharacterSpellSlot)
+
+    // Add this function for deleting character spell slots
+    @Query("DELETE FROM character_spell_slots WHERE characterId = :characterId")
+    suspend fun deleteCharacterSpellSlots(characterId: Int)
+
+    // Add this function for getting character spell slots by characterId and level
+    @Query("SELECT * FROM character_spell_slots WHERE characterId = :characterId AND spellLevel = :spellLevel")
+    fun getCharacterSpellSlot(characterId: Int, spellLevel: Int): Flow<CharacterSpellSlot?>
+
+    // Add this function for updating total spell slots
+    @Query("UPDATE character_spell_slots SET totalSlots = :totalSlots WHERE spellSlotId = :spellSlotId")
+    suspend fun updateSpellSlotTotal(spellSlotId: Int, totalSlots: Int)
+
+    // Add this function for getting prepared spells for a character
+    @Query("""
+    SELECT s.* FROM spells s
+    JOIN character_spells cs ON s.spellId = cs.spellId
+    WHERE cs.characterId = :characterId AND cs.prepared = 1
+    ORDER BY s.spellLevel ASC, s.spellName ASC
+""")
+    fun getPreparedSpells(characterId: Int): Flow<List<Spell>>
+
+    // Add this function for updating spell preparation status
+    @Query("UPDATE character_spells SET prepared = :prepared WHERE characterId = :characterId AND spellId = :spellId")
+    suspend fun updateSpellPreparation(characterId: Int, spellId: Int, prepared: Int)
+
+    // Add this function for checking if a character has a specific spell
+    @Query("SELECT COUNT(*) FROM character_spells WHERE characterId = :characterId AND spellId = :spellId")
+    suspend fun hasSpell(characterId: Int, spellId: Int): Int
+
+    // Add this function for getting character spells with preparation status
+    @Query("""
+    SELECT s.*, cs.prepared FROM spells s
+    JOIN character_spells cs ON s.spellId = cs.spellId
+    WHERE cs.characterId = :characterId
+    ORDER BY s.spellLevel ASC, s.spellName ASC
+""")
+    fun getCharacterSpellsWithPreparation(characterId: Int): Flow<List<SpellWithPreparation>>
+
+    // Add this data class for spells with preparation status
+    data class SpellWithPreparation(
+        @Embedded val spell: Spell,
+        val prepared: Int
+    )
+
+    // Add this function for getting spell slots summary
+    @Query("""
+    SELECT 
+        css.spellLevel,
+        SUM(css.totalSlots) as totalSlots,
+        SUM(css.usedSlots) as usedSlots
+    FROM character_spell_slots css
+    JOIN characters c ON css.characterId = c.characterId
+    WHERE c.characterId = :characterId
+    GROUP BY css.spellLevel
+    ORDER BY css.spellLevel ASC
+""")
+    fun getSpellSlotsSummary(characterId: Int): Flow<List<SpellSlotSummary>>
+
+    // Add this data class for spell slot summary
+    data class SpellSlotSummary(
+        val spellLevel: Int,
+        val totalSlots: Int,
+        val usedSlots: Int
+    )
+
+    // Add this function for resetting spell slots (short rest)
+    @Query("UPDATE character_spell_slots SET usedSlots = 0 WHERE characterId = :characterId")
+    suspend fun resetSpellSlots(characterId: Int)
+
+    // Add this function for getting spellcasting ability based on class
+    @Query("""
+    SELECT 
+        CASE 
+            WHEN className IN ('Bard', 'Sorcerer', 'Paladin', 'Warlock') THEN 'CHA'
+            WHEN className IN ('Cleric', 'Druid', 'Ranger') THEN 'WIS'
+            WHEN className IN ('Wizard', 'Eldritch Knight', 'Arcane Trickster') THEN 'INT'
+            ELSE 'NONE'
+        END as ability
+    FROM classes
+    WHERE classId = :classId
+""")
+    fun getSpellcastingAbility(classId: Int): Flow<String>
+
+    // Add this function for getting available cantrips based on class and level
+    @Query("""
+    SELECT s.* FROM spells s
+    JOIN class_spells cs ON s.spellId = cs.spellId
+    WHERE cs.classId = :classId AND s.spellLevel = 0
+    ORDER BY s.spellName ASC
+""")
+    fun getCantripsForClass(classId: Int): Flow<List<Spell>>
+
+    // Add this function for getting ritual spells
+    @Query("""
+    SELECT s.* FROM spells s
+    JOIN character_spells cs ON s.spellId = cs.spellId
+    WHERE cs.characterId = :characterId AND s.ritual = 1
+    ORDER BY s.spellLevel ASC, s.spellName ASC
+""")
+    fun getRitualSpells(characterId: Int): Flow<List<Spell>>
+
+    // Add this function for getting concentration spells
+    @Query("""
+    SELECT s.* FROM spells s
+    JOIN character_spells cs ON s.spellId = cs.spellId
+    WHERE cs.characterId = :characterId AND s.concentration = 1
+    ORDER BY s.spellLevel ASC, s.spellName ASC
+""")
+    fun getConcentrationSpells(characterId: Int): Flow<List<Spell>>
 
 }
 data class WeaponAndItem(
